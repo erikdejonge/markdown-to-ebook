@@ -45,34 +45,34 @@ Open Calibre and click 'add books'
 ####Step 5
 Select the generated table of contents html file
 
-![toc](resources/toc.png)
+> ![toc](resources/toc.png)
 
 Wait for Calibre reading the files
 
-![reading](resources/reading.png)
+> ![reading](resources/reading.png)
 
 ####Step 6
 Right click the book to convert it
 
-![rightclickconvert](resources/rightclickconvert.png)
+> ![rightclickconvert](resources/rightclickconvert.png)
 
 Optionally right click the ebook to change the metadata
 
-![changemetadata](resources/changemetadata.png)
+> ![changemetadata](resources/changemetadata.png)
 
 Wait for the converson to finish
 
-![working](resources/working.png)
+> ![working](resources/working.png)
 
 ####Step 7
 When done, right click to save the book
 
-![savebook](resources/savebook.png)
+> ![savebook](resources/savebook.png)
 
 ####Result
 Kindle on Mac
 
-![kindle](resources/kindle.png)
+> ![kindle](resources/kindle.png)
 
 
 ##Extra, make an ebook of all your cloned github projects
