@@ -11,7 +11,7 @@ def main():
     main
     """
     os.system("rm -Rf github/*")
-    bs = "/Users/rabshakeh/workspace/github"
+    bs = os.path.expanduser("~/workspace/github")
     for d in os.listdir(bs):
 
         fp = os.path.join("/Users/rabshakeh/workspace/github", d)

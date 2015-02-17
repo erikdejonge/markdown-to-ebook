@@ -22,7 +22,7 @@ def main():
     main
     """
     os.system("rm -Rf github/*")
-    bs = os.path.expanduser("~/workspace")
+    bs = os.path.expanduser("~/workspace/github")
     for d in os.listdir(bs):
         fp = os.path.join(os.path.expanduser("~/workspace/github"), d)
         print fp
