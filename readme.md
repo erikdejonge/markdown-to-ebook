@@ -48,35 +48,44 @@ Select the generated table of contents html file
 ![toc](resources/toc.png)
 
 Wait for Calibre reading the files
+
 ![reading](resources/reading.png)
 
 ####Step 6
 Right click the book to convert it
+
 ![rightclickconvert](resources/rightclickconvert.png)
 
 Optionally right click the ebook to change the metadata
+
 ![changemetadata](resources/changemetadata.png)
 
 Wait for the converson to finish
+
 ![working](resources/working.png)
 
 ####Step 7
 When done, right click to save the book
+
 ![savebook](resources/savebook.png)
 
 ####Result
+Kindle on Mac
+
 ![kindle](resources/kindle.png)
 
 
-##Extra
-Run one of the collection scripts 
+##Extra, make an ebook of all your cloned github projects
+Run one of the collection scripts, and put the results in the markdown folder, continue at step 1
 
 ```bash
 # collects all the readme's from ~/workspace/github into a local github directory
 $ python get_github_readmes.py
+
 # collects all the readme's and doc directories from ~/workspace/github into a local github directory
 $ python get_github_readme_and_docs.py
 ```
+
 
 
 
