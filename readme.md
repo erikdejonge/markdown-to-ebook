@@ -1,13 +1,15 @@
 # github-md5-ebook
-Loops a directory with github projects, scans for documentation and readme's. And builds a html-version compatible with Callibre
+Loops a directory with github projects, scans for documentation and readme's. And builds a html-version compatible with Calibre
 
 ##Convert .md files to an ebook
 ####Prerequisites
+* ebook converter
+* Calibre: http://calibre-ebook.com/download
+
 ```bash
-# ebook converter
+# install ebook converter
 $ npm install -g ebook
 ```
-Callibre(http://calibre-ebook.com/download)
 
 ####Step 1
 Put md5 files in a folder inside of the markdown directory
@@ -36,6 +38,32 @@ convert: markdown/GithubReadmeDocs/coffee-script/test/importing 2 items
 ```
 
 ####Step 4
+Open Calibre and click 'add books' 
+![addbooks](resources/addbooks.png)
+
+####Step 5
+Select the generated table of contents html file
+![toc](resources/toc.png)
+
+Wait for Calibre reading the files
+![reading](resources/reading.png)
+
+####Step 6
+Right click the book to convert it
+![rightclickconvert](resources/rightclickconvert.png)
+
+Optionally right click the ebook to change the metadata
+![changemetadata](resources/changemetadata.png)
+
+Wait for the converson to finish
+![working](resources/working.png)
+
+####Step 7
+When done, right click to save the book
+![savebook](resources/savebook.png)
+
+####Result
+![kindle](resources/kindle.png)
 
 
 ##Extra
@@ -49,4 +77,4 @@ $ python get_github_readme_and_docs.py
 ```
 
 
-![addbooks](resources/addbooks.png)
+
