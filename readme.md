@@ -39,10 +39,12 @@ convert: markdown/GithubReadmeDocs/coffee-script/test/importing 2 items
 
 ####Step 4
 Open Calibre and click 'add books' 
+
 ![addbooks](resources/addbooks.png)
 
 ####Step 5
 Select the generated table of contents html file
+
 ![toc](resources/toc.png)
 
 Wait for Calibre reading the files
