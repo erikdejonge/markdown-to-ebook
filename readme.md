@@ -2,6 +2,12 @@
 Loops a directory with github projects, scans for documentation and readme's. And builds a html-version compatible with Callibre
 
 ##Convert .md files to an ebook
+####Prerequisites
+```bash
+# ebook converter
+$ npm install -g ebook
+```
+Callibre(http://calibre-ebook.com/download)
 
 ####Step 1
 Put md5 files in a folder inside of the markdown directory
@@ -20,6 +26,16 @@ $ ls markdown/GithubReadmeDocs | wc
     134    1199    7748
 ```
 
+####Step 2
+Run the md2html python script, this will convert all .md files to .html, and generates a table of content
+
+```bash
+$ python md2html.py
+convert: markdown/GithubReadmeDocs/coffee-script/test/importing 2 items
+...
+```
+
+####Step 4
 
 
 ##Extra
