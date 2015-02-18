@@ -61,20 +61,20 @@ def main():
 
     os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
     print "delete py"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.py'  -exec rm -rf {} \;")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.go'  -exec rm -rf {} \;")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.js*'  -exec rm -rf {} \;")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
     print 'delete html'
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \;")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
     print "delete godeps"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name 'Godeps*'  -exec rm -rf {} \;")
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '_Godeps*'  -exec rm -rf {} \;")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
     print "delete empty folders"
     os.system("sudo find markdown -depth -empty -delete")
     print "convert txt to md"
-    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \;""")
+    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
 
 
 if __name__ == "__main__":

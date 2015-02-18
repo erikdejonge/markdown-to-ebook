@@ -4,10 +4,11 @@ convert markdown to html
 """
 
 import os
+import shutil
 import uuid
-
+import time
 import multiprocessing
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 
 import subprocess
 from subprocess import Popen
@@ -42,7 +43,6 @@ def doconversion_md2html(f, folder):
             for i in l:
                 c = c.replace(i, "")
             open(hf, "w").write(c)
-            exit(1)
     except Exception, e:
         print e
         raise
@@ -54,7 +54,9 @@ def doconversion(f, folder):
     @return: None
     """
     try:
-        print os.path.basename(folder), f
+        if "tempfolder" in folder:
+            raise AssertionError("searching tempfolder")
+
         tempfolder = "tempfolder"+uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
         ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
@@ -64,8 +66,10 @@ def doconversion(f, folder):
 
         if len(res.strip())!=0:
             print 20*" ", res
-
-        os.system("cp " + os.path.join(cwf, tempfolder+"/*.html") + " " + cwf )#+"&&rm -Rf "+os.path.join(cwf, tempfolder))
+        else:
+            print os.path.join(cwf, f.replace(".md", ".html"))
+            shutil.copyfile(os.path.join(cwf, tempfolder+"/"+f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
+            
     except Exception, e:
         print e
         raise
@@ -94,8 +98,9 @@ def convert(folder, ppool):
                 fp2.write(c.replace(".md", ".html"))
                 fp2.close()
 
-                doconversion(f, folder)
-                #ppool.apply_async(doconversion, (f, folder))
+                #doconversion(f, folder)
+                #exit(1)
+                ppool.apply_async(doconversion, (f, folder))
 
                 # doconversion(f, folder)
 
@@ -111,7 +116,7 @@ def toc_files(folder, toc):
         if os.path.isdir(os.path.join(folder, f)):
             toc = toc_files(os.path.join(folder, f), toc)
         else:
-            if f.endswith("html"):
+            if f.endswith(".html"):
                 dname = os.path.join(folder, f)
                 dname = dname.split("/")
                 dname = dname[2:]
@@ -146,21 +151,22 @@ def main():
     main
     """
     os.system("rm markdown/*.html")
+
     print "delete py"
-    os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
-    os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
-    os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
     print 'delete html'
-    os.system("cd markdown/*&&sudo find . -name '*.html' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
     print "delete godeps"
-    os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \;")
-    os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
     print "delete empty folders"
     os.system("sudo find markdown -depth -empty -delete")
     print "convert txt to md"
-    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \;""")
+    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     booktitle = "".join(os.listdir("markdown"))
     try:
 
@@ -169,7 +175,7 @@ def main():
     except KeyboardInterrupt:
         return
 
-    ppool = Pool(multiprocessing.cpu_count())
+    ppool = Pool(multiprocessing.cpu_count()*2)
     convert("markdown", ppool)
     ppool.close()
     ppool.join()
