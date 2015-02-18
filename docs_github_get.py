@@ -48,14 +48,16 @@ def main():
                 if interest.lower() in fp.lower():
                     get_folder(c, d, fp)
                     have_docs = True
-
+            ce = False
             if (os.path.exists(rm1) or os.path.exists(rm2) or os.path.exists(rm3) or os.path.exists(rm4)) and not have_docs:
                 c = None
+
                 for rm in [rm1, rm2, rm3, rm4]:
                     if os.path.exists(rm):
+                        ce = True
                         c = open(rm).read()
 
-                if c:
+                if ce:
                     os.mkdir("markdown/Github_Docs_Readmes/" + d)
                     open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
 
@@ -68,7 +70,8 @@ def main():
                     have_docs = True
 
             if not have_docs:
-                os.system("mv markdown/Github_Docs_Readmes/" + d + " markdown/Github_Docs_Readmes/_Readmes/")
+                if ce is True:
+                    os.system("mv "+os.path.join("markdown/Github_Docs_Readmes", d) + " markdown/Github_Docs_Readmes/_Readmes/")
             else:
                 os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
 
