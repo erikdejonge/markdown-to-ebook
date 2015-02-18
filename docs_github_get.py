@@ -50,6 +50,7 @@ def main():
             for rm in [rm1, rm2, rm3]:
                 if os.path.exists(rm):
                     c = open(rm).read()
+
             if c:
                 os.mkdir("markdown/Github_Docs_Readmes/" + d)
                 open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)

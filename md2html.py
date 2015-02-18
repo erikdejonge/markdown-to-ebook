@@ -12,42 +12,10 @@ from multiprocessing.dummy import Pool
 
 import subprocess
 from subprocess import Popen
-
 from threading import Lock
+
 g_lock = Lock()
 
-def doconversion_md2html(f, folder):
-    """
-    @type f: str, unicode
-    @type folder: str, unicode
-    @return: None
-    """
-    try:
-        cwf = os.path.join(os.getcwd(), folder)
-        #ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
-        ebook = Popen(["md2html", "-p", "-f", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
-        print folder, f
-        ebook.wait()
-        out, err = ebook.communicate()
-        out = [x for x in out.split("\n") if "Completed" in x]
-        hf = None
-        if len(out)>0:
-            out = out[0].split(" ")
-            if len(out) > 1:
-                hf = out[1].replace("'", "")
-        if hf is not None:
-            c = open(hf).read()
-            l = ['<div>Loading...</div>',
-                 '<link type="text/css" rel="stylesheet" href="http://jasonm23.github.com/markdown-css-themes/swiss.css">',
-                 '<textarea id="mdstr" style=display:none>',
-                 '</textarea>',
-                 '    <script src="https://raw.github.com/evilstreak/markdown-js/master/lib/markdown.js"></script>\n    <script>\n      var mdstr = document.getElementById(\'mdstr\').value;\n      var html = markdown.toHTML(mdstr);\n      document.body.innerHTML = html;\n    </script>\n']
-            for i in l:
-                c = c.replace(i, "")
-            open(hf, "w").write(c)
-    except Exception, e:
-        print e
-        raise
 
 def doconversion(f, folder):
     """
@@ -58,13 +26,15 @@ def doconversion(f, folder):
     global g_lock
     try:
         if "tempfolder" in folder:
-            raise AssertionError("searching tempfolder")
+            print "searching tempfolder, skipping", folder
+            return
 
         tempfolder = "tempfolder"+uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
-        so = ""
-        se = ""
-        
+
+        if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
+            print "file exists skipping", os.path.join(cwf, f.replace(".md", ".html"))
+            return
         try:
             g_lock.acquire()
             ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
@@ -80,7 +50,6 @@ def doconversion(f, folder):
         else:
             print os.path.join(cwf, f.replace(".md", ".html"))
             shutil.copyfile(os.path.join(cwf, tempfolder+"/"+f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
-
     except Exception, e:
         print e
         raise
@@ -96,7 +65,6 @@ def convert(folder, ppool):
 
     #if numitems > 0:
     #    print "convert:", folder, numitems, "items"
-
     fl = [x for x in os.listdir(folder)]
     for f in fl:
         if os.path.isdir(os.path.join(folder, f)):
@@ -110,10 +78,7 @@ def convert(folder, ppool):
                 fp2.close()
 
                 #doconversion(f, folder)
-                #exit(1)
                 ppool.apply_async(doconversion, (f, folder))
-
-                # doconversion(f, folder)
 
 
 def toc_files(folder, toc):
@@ -161,16 +126,14 @@ def main():
     """
     main
     """
+    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     os.system("rm markdown/*.html")
-
     print "delete py"
     os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
     os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
     os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
-    print 'delete html'
-    os.system("cd markdown/*&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
     print "delete godeps"
     os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
@@ -180,13 +143,7 @@ def main():
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     booktitle = "".join(os.listdir("markdown"))
-    try:
-
-        #raw_input("press enter to continue with title " + booktitle + ": ")
-        print 'booktitle', booktitle
-    except KeyboardInterrupt:
-        return
-
+    print 'booktitle', booktitle
     ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
     ppool.close()
