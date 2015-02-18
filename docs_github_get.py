@@ -25,24 +25,28 @@ def main():
     """
     main
     """
-    os.system("rm markdown/*.html")
+    os.system("rm -f markdown/*.html")
     special_interests = ["kubernetes", "coreos", "docker", "redis", "etcd"]
-
     os.system("sudo rm -Rf markdown/Github_Docs_Readmes&&mkdir -p markdown/Github_Docs_Readmes/_Readmes")
     bs = os.path.expanduser("~/workspace/github")
 
     for d in os.listdir(bs):
+        have_docs = False
         fp = os.path.join(os.path.expanduser("~/workspace/github"), d)
         print fp
         rm = os.path.join(fp, "readme.md")
         docs = os.path.join(fp, "docs")
         docu = os.path.join(fp, "Documentation")
 
-        if os.path.exists(rm):
+        for interest in special_interests:
+            if interest.lower() in fp.lower():
+                get_folder(c, d, fp)
+                have_docs = True
+
+        if os.path.exists(rm) and not have_docs:
             c = open(rm).read()
             os.mkdir("markdown/Github_Docs_Readmes/" + d)
             open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
-            have_docs = False
 
             if os.path.exists(docs):
                 get_folder(c, d, fp)
@@ -52,17 +56,10 @@ def main():
                 get_folder(c, d, fp)
                 have_docs = True
 
-            for interest in special_interests:
-                if interest.lower() in fp.lower():
-                    get_folder(c, d, fp)
-                    have_docs = True
-
             if not have_docs:
                 os.system("mv markdown/Github_Docs_Readmes/" + d + " markdown/Github_Docs_Readmes/_Readmes/")
 
     os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
-
-
     print "delete py"
     os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.py'  -exec rm -rf {} \;")
     print "delete go"
@@ -76,6 +73,8 @@ def main():
     os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '_Godeps*'  -exec rm -rf {} \;")
     print "delete empty folders"
     os.system("sudo find markdown -depth -empty -delete")
+    print "convert txt to md"
+    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \;""")
 
 
 if __name__ == "__main__":

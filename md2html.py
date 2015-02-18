@@ -4,13 +4,48 @@ convert markdown to html
 """
 
 import os
-import time
+import uuid
+
 import multiprocessing
 from multiprocessing import Pool
 
 import subprocess
 from subprocess import Popen
 
+
+def doconversion_md2html(f, folder):
+    """
+    @type f: str, unicode
+    @type folder: str, unicode
+    @return: None
+    """
+    try:
+        cwf = os.path.join(os.getcwd(), folder)
+        #ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
+        ebook = Popen(["md2html", "-p", "-f", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
+        print folder, f
+        ebook.wait()
+        out, err = ebook.communicate()
+        out = [x for x in out.split("\n") if "Completed" in x]
+        hf = None
+        if len(out)>0:
+            out = out[0].split(" ")
+            if len(out) > 1:
+                hf = out[1].replace("'", "")
+        if hf is not None:
+            c = open(hf).read()
+            l = ['<div>Loading...</div>',
+                 '<link type="text/css" rel="stylesheet" href="http://jasonm23.github.com/markdown-css-themes/swiss.css">',
+                 '<textarea id="mdstr" style=display:none>',
+                 '</textarea>',
+                 '    <script src="https://raw.github.com/evilstreak/markdown-js/master/lib/markdown.js"></script>\n    <script>\n      var mdstr = document.getElementById(\'mdstr\').value;\n      var html = markdown.toHTML(mdstr);\n      document.body.innerHTML = html;\n    </script>\n']
+            for i in l:
+                c = c.replace(i, "")
+            open(hf, "w").write(c)
+            exit(1)
+    except Exception, e:
+        print e
+        raise
 
 def doconversion(f, folder):
     """
@@ -19,37 +54,18 @@ def doconversion(f, folder):
     @return: None
     """
     try:
-        print "conversion", folder, f
+        print os.path.basename(folder), f
+        tempfolder = "tempfolder"+uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
-        ebook = Popen(["ebook", "--f", "conv", "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
+        ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
         ebook.wait()
         so, se = ebook.communicate()
         res = str(so)+str(se)
 
-        if "Error:" not in res:
-            cnt = 0
+        if len(res.strip())!=0:
+            print 20*" ", res
 
-            while not os.path.exists(os.path.join(cwf, "conv")):
-                print folder, f, res
-                time.sleep(0.1)
-                cnt += 1
-
-                if cnt > 10:
-                    break
-
-            cnt = 0
-
-            while len(os.listdir(os.path.join(cwf, "conv"))) == 0:
-                time.sleep(0.1)
-                cnt += 1
-
-                if cnt > 10:
-                    break
-
-            os.system("cp " + os.path.join(cwf, "conv/*.html") + " " + cwf)
-
-            #Popen(["rm", "-Rf", os.path.join(cwf,"conv")], cwd=cwf).wait()
-            #Popen(["rm", os.path.join(cwf,f)], cwd=cwf).wait()
+        os.system("cp " + os.path.join(cwf, tempfolder+"/*.html") + " " + cwf )#+"&&rm -Rf "+os.path.join(cwf, tempfolder))
     except Exception, e:
         print e
         raise
@@ -63,8 +79,8 @@ def convert(folder, ppool):
     """
     numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
 
-    if numitems > 0:
-        print "convert:", folder, numitems, "items"
+    #if numitems > 0:
+    #    print "convert:", folder, numitems, "items"
 
     fl = [x for x in os.listdir(folder)]
     for f in fl:
@@ -78,8 +94,8 @@ def convert(folder, ppool):
                 fp2.write(c.replace(".md", ".html"))
                 fp2.close()
 
-                #doconversion(f, folder)
-                ppool.apply_async(doconversion, (f, folder))
+                doconversion(f, folder)
+                #ppool.apply_async(doconversion, (f, folder))
 
                 # doconversion(f, folder)
 
@@ -130,6 +146,21 @@ def main():
     main
     """
     os.system("rm markdown/*.html")
+    print "delete py"
+    os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \;")
+    print "delete go"
+    os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \;")
+    print "delete js"
+    os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \;")
+    print 'delete html'
+    os.system("cd markdown/*&&sudo find . -name '*.html' -exec rm -rf {} \;")
+    print "delete godeps"
+    os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \;")
+    os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \;")
+    print "delete empty folders"
+    os.system("sudo find markdown -depth -empty -delete")
+    print "convert txt to md"
+    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \;""")
     booktitle = "".join(os.listdir("markdown"))
     try:
 
@@ -142,6 +173,7 @@ def main():
     convert("markdown", ppool)
     ppool.close()
     ppool.join()
+    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     make_toc("markdown", booktitle)
 
 
