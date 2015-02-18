@@ -126,14 +126,35 @@ def main():
     """
     main
     """
-    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+
     os.system("rm markdown/*.html")
+    booktitle = "".join(os.listdir("markdown"))
+
+    specialchar = False
+    scs = [" ", "&", "?"]
+
+    for c in scs:
+        if c in booktitle.strip():
+            print "directory with special char, exit", {1:c, 2:booktitle}
+            specialchar = True
+            break
+    if specialchar is True:
+        return
+
+    print 'booktitle', booktitle
+
+    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+
     print "delete py"
     os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
     os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
     os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
+    print "delete man"
+    os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
+    print 'delete commands'
+    os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
     print "delete godeps"
     os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
@@ -142,8 +163,7 @@ def main():
     print "convert txt to md"
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
-    booktitle = "".join(os.listdir("markdown"))
-    print 'booktitle', booktitle
+
     ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
     ppool.close()
