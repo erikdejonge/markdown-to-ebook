@@ -31,40 +31,49 @@ def main():
     bs = os.path.expanduser("~/workspace/github")
 
     for d in os.listdir(bs):
+
+
         have_docs = False
         fp = os.path.join(os.path.expanduser("~/workspace/github"), d)
         print fp
-        rm1 = os.path.join(fp, "readme.md")
-        rm2 = os.path.join(fp, "readme.txt")
-        rm3 = os.path.join(fp, "readme.rst")
-        docs = os.path.join(fp, "docs")
-        docu = os.path.join(fp, "Documentation")
+        if os.path.isdir(fp):
+            rm1 = os.path.join(fp, "readme.md")
+            rm2 = os.path.join(fp, "readme.txt")
+            rm3 = os.path.join(fp, "readme.rst")
+            rm4 = os.path.join(fp, "readme")
+            docs = os.path.join(fp, "docs")
+            docu = os.path.join(fp, "Documentation")
 
-        for interest in special_interests:
-            if interest.lower() in fp.lower():
-                get_folder(c, d, fp)
-                have_docs = True
+            for interest in special_interests:
+                if interest.lower() in fp.lower():
+                    get_folder(c, d, fp)
+                    have_docs = True
 
-        if (os.path.exists(rm1) or os.path.exists(rm2) or os.path.exists(rm3)) and not have_docs:
-            c = None
-            for rm in [rm1, rm2, rm3]:
-                if os.path.exists(rm):
-                    c = open(rm).read()
+            if (os.path.exists(rm1) or os.path.exists(rm2) or os.path.exists(rm3) or os.path.exists(rm4)) and not have_docs:
+                c = None
+                for rm in [rm1, rm2, rm3, rm4]:
+                    if os.path.exists(rm):
+                        c = open(rm).read()
 
-            if c:
-                os.mkdir("markdown/Github_Docs_Readmes/" + d)
-                open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+                if c:
+                    os.mkdir("markdown/Github_Docs_Readmes/" + d)
+                    open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
 
-            if os.path.exists(docs):
-                get_folder(c, d, fp)
-                have_docs = True
+                if os.path.exists(docs):
+                    get_folder(c, d, fp)
+                    have_docs = True
 
-            if os.path.exists(docu):
-                get_folder(c, d, fp)
-                have_docs = True
+                if os.path.exists(docu):
+                    get_folder(c, d, fp)
+                    have_docs = True
 
             if not have_docs:
                 os.system("mv markdown/Github_Docs_Readmes/" + d + " markdown/Github_Docs_Readmes/_Readmes/")
+            else:
+                os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
+
+                os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d +"/ 2> /dev/null")
+                os.system("cp markdown/Github_Docs_Readmes/" + d + "/README* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
 
     os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
     print "delete py"
