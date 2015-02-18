@@ -69,7 +69,7 @@ def doconversion(f, folder):
         else:
             print os.path.join(cwf, f.replace(".md", ".html"))
             shutil.copyfile(os.path.join(cwf, tempfolder+"/"+f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
-            
+
     except Exception, e:
         print e
         raise
@@ -167,6 +167,7 @@ def main():
     os.system("sudo find markdown -depth -empty -delete")
     print "convert txt to md"
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+    os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     booktitle = "".join(os.listdir("markdown"))
     try:
 
