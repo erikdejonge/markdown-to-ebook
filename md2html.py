@@ -13,6 +13,8 @@ from multiprocessing.dummy import Pool
 import subprocess
 from subprocess import Popen
 
+from threading import Lock
+g_lock = Lock()
 
 def doconversion_md2html(f, folder):
     """
@@ -53,15 +55,24 @@ def doconversion(f, folder):
     @type folder: str, unicode
     @return: None
     """
+    global g_lock
     try:
         if "tempfolder" in folder:
             raise AssertionError("searching tempfolder")
 
         tempfolder = "tempfolder"+uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
-        ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
-        ebook.wait()
-        so, se = ebook.communicate()
+        so = ""
+        se = ""
+        
+        try:
+            g_lock.acquire()
+            ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
+            ebook.wait()
+            so, se = ebook.communicate()
+        finally:
+            g_lock.release()
+
         res = str(so)+str(se)
 
         if len(res.strip())!=0:
@@ -176,10 +187,11 @@ def main():
     except KeyboardInterrupt:
         return
 
-    ppool = Pool(multiprocessing.cpu_count()*2)
+    ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
     ppool.close()
     ppool.join()
+    time.sleep(5)
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     make_toc("markdown", booktitle)
 
