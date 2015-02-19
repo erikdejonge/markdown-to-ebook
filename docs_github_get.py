@@ -8,7 +8,7 @@ import os
 
 def get_folder(d, fp):
     """
-    
+
     @type d: str, unicode
     @type fp: str, unicode
     @return: None
@@ -44,11 +44,8 @@ def main():
 
             for interest in special_interests:
                 if interest.lower() in fp.lower():
-                    print
-                    print
-                    print d, fp
                     #raise AssertionError(str(interest))
-                    get_folder("unknown_name_here", d, fp)
+                    get_folder(d, fp)
                     have_docs = True
 
             ce = False
@@ -65,11 +62,11 @@ def main():
                     open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
 
                 if os.path.exists(docs):
-                    get_folder(c, d, fp)
+                    get_folder(d, fp)
                     have_docs = True
 
                 if os.path.exists(docu):
-                    get_folder(c, d, fp)
+                    get_folder(d, fp)
                     have_docs = True
 
             if not have_docs:

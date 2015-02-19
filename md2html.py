@@ -152,6 +152,10 @@ def main():
         return
 
     print 'booktitle', booktitle
+    print "== cleaning =="
+    print "delete symlinks"
+    os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \;")
+    print "delete tempfolders"
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     print "delete py"
     os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
@@ -171,6 +175,7 @@ def main():
     print "convert txt to md"
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
+    print "== done cleaning =="
     ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
     ppool.close()
