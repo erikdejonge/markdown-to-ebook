@@ -126,8 +126,8 @@ def main():
     """
     main
     """
-
-    os.system("rm markdown/*.html")
+    os.system("sudo date")
+    os.system("rm -f markdown.tar; tar -cf markdown.tar ./markdown; rm -f markdown/*.html")
     booktitle = "".join(os.listdir("markdown"))
 
     specialchar = False
@@ -136,6 +136,7 @@ def main():
     for c in scs:
         if c in booktitle.strip():
             print "directory with special char, exit", {1:c, 2:booktitle}
+            raw_input("press enter: ")
             specialchar = True
             break
     if specialchar is True:
