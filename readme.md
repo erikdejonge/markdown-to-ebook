@@ -1,4 +1,4 @@
-# github-md5-ebook
+# markdown-github-to-ebook
 Loops a directory with github projects, scans for documentation and readme's. And builds a html-version compatible with Calibre
 
 ##Convert .md files to an ebook
