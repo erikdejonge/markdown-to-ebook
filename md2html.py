@@ -6,7 +6,6 @@ convert markdown to html
 import os
 import shutil
 import uuid
-import time
 import multiprocessing
 from multiprocessing.dummy import Pool
 
@@ -60,10 +59,6 @@ def convert(folder, ppool):
     @type ppool: multiprocessing.Pool
     @return: None
     """
-    numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
-
-    # if numitems > 0:
-    #    print "convert:", folder, numitems, "items"
     fl = [x for x in os.listdir(folder)]
     for f in fl:
         if os.path.isdir(os.path.join(folder, f)):
@@ -76,7 +71,12 @@ def convert(folder, ppool):
                 fp2.write(c.replace(".md", ".html"))
                 fp2.close()
 
-                #doconversion(f, folder)
+                # doconversion(f, folder)
+                numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
+
+                if numitems > 0:
+                    print "convert:", folder, numitems, "items"
+
                 ppool.apply_async(doconversion, (f, folder))
 
 
@@ -104,6 +104,7 @@ def toc_files(folder, toc):
 def make_toc(folder, bookname):
     """
     @type folder: str, unicode
+    @type bookname: str, unicode
     @return: None
     """
     toc = """
@@ -174,7 +175,6 @@ def main():
     convert("markdown", ppool)
     ppool.close()
     ppool.join()
-    
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     make_toc("markdown", booktitle)
 

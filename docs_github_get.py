@@ -6,9 +6,9 @@ convert markdown/Github_Docs_Readmes to html
 import os
 
 
-def get_folder(c, d, fp):
+def get_folder(d, fp):
     """
-    @type c: str, unicode
+    
     @type d: str, unicode
     @type fp: str, unicode
     @return: None
@@ -16,7 +16,7 @@ def get_folder(c, d, fp):
     if not os.path.exists("markdown/Github_Docs_Readmes/" + d):
         os.mkdir("markdown/Github_Docs_Readmes/" + d)
 
-    open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+    #open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
     os.system("sudo cp -r " + fp + " markdown/Github_Docs_Readmes/")
     os.system("sudo rm -Rf markdown/Github_Docs_Readmes/" + d + "/.git")
 
@@ -31,8 +31,6 @@ def main():
     bs = os.path.expanduser("~/workspace/github")
 
     for d in os.listdir(bs):
-
-
         have_docs = False
         fp = os.path.join(os.path.expanduser("~/workspace/github"), d)
         print fp
@@ -46,12 +44,17 @@ def main():
 
             for interest in special_interests:
                 if interest.lower() in fp.lower():
-                    get_folder(c, d, fp)
+                    print
+                    print
+                    print d, fp
+                    #raise AssertionError(str(interest))
+                    get_folder("unknown_name_here", d, fp)
                     have_docs = True
+
             ce = False
+
             if (os.path.exists(rm1) or os.path.exists(rm2) or os.path.exists(rm3) or os.path.exists(rm4)) and not have_docs:
                 c = None
-
                 for rm in [rm1, rm2, rm3, rm4]:
                     if os.path.exists(rm):
                         ce = True
@@ -71,11 +74,10 @@ def main():
 
             if not have_docs:
                 if ce is True:
-                    os.system("mv "+os.path.join("markdown/Github_Docs_Readmes", d) + " markdown/Github_Docs_Readmes/_Readmes/")
+                    os.system("mv " + os.path.join("markdown/Github_Docs_Readmes", d) + " markdown/Github_Docs_Readmes/_Readmes/")
             else:
                 os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
-
-                os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d +"/ 2> /dev/null")
+                os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
                 os.system("cp markdown/Github_Docs_Readmes/" + d + "/README* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
 
     os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
