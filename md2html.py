@@ -29,7 +29,7 @@ def doconversion(f, folder):
             print "searching tempfolder, skipping", folder
             return
 
-        tempfolder = "tempfolder"+uuid.uuid4().hex
+        tempfolder = "tempfolder" + uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
 
         if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
@@ -43,13 +43,12 @@ def doconversion(f, folder):
         finally:
             g_lock.release()
 
-        res = str(so)+str(se)
-
-        if len(res.strip())!=0:
-            print 20*" ", res
+        res = str(so) + str(se)
+        if len(res.strip()) != 0:
+            print 20 * " ", res
         else:
             print os.path.join(cwf, f.replace(".md", ".html"))
-            shutil.copyfile(os.path.join(cwf, tempfolder+"/"+f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
+            shutil.copyfile(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
     except Exception, e:
         print e
         raise
@@ -63,7 +62,7 @@ def convert(folder, ppool):
     """
     numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
 
-    #if numitems > 0:
+    # if numitems > 0:
     #    print "convert:", folder, numitems, "items"
     fl = [x for x in os.listdir(folder)]
     for f in fl:
@@ -126,26 +125,33 @@ def main():
     """
     main
     """
-    os.system("sudo date")
-    os.system("rm -f markdown.tar; tar -cf markdown.tar ./markdown; rm -f markdown/*.html")
-    booktitle = "".join(os.listdir("markdown"))
+    if not os.path.exists("markdown"):
+        print "no markdown folder"
+        return
 
+    if len(os.listdir("./markdown")) == 0:
+        print "markdown folder is empty"
+        return
+
+    os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar; rm -f markdown/*.html")
+    booktitle = "".join(os.listdir("markdown"))
     specialchar = False
     scs = [" ", "&", "?"]
 
     for c in scs:
         if c in booktitle.strip():
-            print "directory with special char, exit", {1:c, 2:booktitle}
-            raw_input("press enter: ")
+            specialchard = {1: c,
+                            2: booktitle}
+
+            print "directory with special char", specialchard
             specialchar = True
             break
+
     if specialchar is True:
         return
 
     print 'booktitle', booktitle
-
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-
     print "delete py"
     os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
@@ -164,12 +170,11 @@ def main():
     print "convert txt to md"
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
-
     ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
     ppool.close()
     ppool.join()
-    time.sleep(5)
+    
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     make_toc("markdown", booktitle)
 
