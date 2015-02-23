@@ -46,7 +46,7 @@ def doconversion(f, folder):
         if len(res.strip()) != 0:
             print 20 * " ", res
         else:
-            print os.path.join(cwf, f.replace(".md", ".html"))
+            print "writing:", os.path.join(cwf, f.replace(".md", ".html"))
             shutil.copyfile(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
     except Exception, e:
         print e
@@ -74,8 +74,8 @@ def convert(folder, ppool):
                 # doconversion(f, folder)
                 numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
 
-                if numitems > 0:
-                    print "convert:", folder, numitems, "items"
+                #if numitems > 0:
+                #    print "convert:", folder, numitems, "items"
 
                 ppool.apply_async(doconversion, (f, folder))
 
@@ -121,16 +121,28 @@ def make_toc(folder, bookname):
 
     open(folder + "/" + bookname.replace("_", " ") + ".html", "w").write(toc)
 
+
 def convertmdcode(ext):
+    """
+    @type ext: str, unicode
+    @return: None
+    """
     for p in os.popen("find markdown -name  '*.md"+ext+"' -type f").read().split("\n"):
         if os.path.exists(p):
-            open(p.replace(".md"+ext, ".md"), "w").write("```"+ext+"\n"+open(p).read()+"```")
+            print ext
+            if ext.lower().strip() == "js":
+                extcss = "javascript"
+            else:
+                extcss = ext
+            open(p.replace(".md"+ext, ".md"), "w").write("```"+extcss+"\n"+open(p).read()+"```")
             os.remove(p)
+
+
 def main():
     """
     main
     """
-    convertcode = raw_input("Convert python and go sourcecode to md?\n(y/n): ")
+    convertcode = raw_input("Convert sourcecode (py, go, coffee and js) to md?\n(y/n): ")
 
     if convertcode.lower() == "y":
         convertcode = True
@@ -166,20 +178,35 @@ def main():
     print "== cleaning =="
     print "delete symlinks"
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \;")
-    print "delete tempfolders"
-    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     print "handle py"
     if convertcode:
-        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.go/.mdpython}"' -- {} \; 2> /dev/null""")
+        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.py/.mdpython}"' -- {} \; 2> /dev/null""")
         convertmdcode("python")
-    os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
+    else:
+        os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
+
     print "handle go files"
     if convertcode:
         os.system("""find markdown/ -name '*.go' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.go/.mdgo}"' -- {} \; 2> /dev/null""")
         convertmdcode("go")
-    os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
-    print "delete js"
-    os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
+    else:
+        os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
+
+    print "handle js"
+    if convertcode:
+        os.system("""find markdown/ -name '*.js' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.js/.mdjs}"' -- {} \; 2> /dev/null""")
+        convertmdcode("js")
+
+    else:
+        os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
+
+    print "handle coffee"
+    if convertcode:
+        os.system("""find markdown/ -name '*.coffee' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.coffee/.mdcoffee}"' -- {} \; 2> /dev/null""")
+        convertmdcode("coffee")
+    else:
+        os.system("cd markdown/*&&sudo find . -name '*.coffee*' -exec rm -rf {} \; 2> /dev/null")
+
     print "delete man"
     os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
     print 'delete commands'
@@ -192,6 +219,8 @@ def main():
     print "convert txt to md"
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
+    print "delete tempfolders"
+    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     print "== done cleaning =="
     ppool = Pool(multiprocessing.cpu_count())
     convert("markdown", ppool)
