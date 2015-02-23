@@ -76,7 +76,6 @@ def convert(folder, ppool):
 
                 #if numitems > 0:
                 #    print "convert:", folder, numitems, "items"
-
                 ppool.apply_async(doconversion, (f, folder))
 
 
@@ -134,6 +133,7 @@ def convertmdcode(ext):
                 extcss = "javascript"
             else:
                 extcss = ext
+
             open(p.replace(".md"+ext, ".md"), "w").write("```"+extcss+"\n"+open(p).read()+"```")
             os.remove(p)
 
@@ -176,6 +176,8 @@ def main():
 
     print 'booktitle', booktitle
     print "== cleaning =="
+    print "markdown .git folders"
+    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \;")
     print "delete symlinks"
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \;")
     print "handle py"
@@ -196,7 +198,6 @@ def main():
     if convertcode:
         os.system("""find markdown/ -name '*.js' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.js/.mdjs}"' -- {} \; 2> /dev/null""")
         convertmdcode("js")
-
     else:
         os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
 
