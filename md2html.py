@@ -121,11 +121,22 @@ def make_toc(folder, bookname):
 
     open(folder + "/" + bookname.replace("_", " ") + ".html", "w").write(toc)
 
-
+def convertmdcode(ext):
+    for p in os.popen("find markdown -name  '*.md"+ext+"' -type f").read().split("\n"):
+        if os.path.exists(p):
+            open(p.replace(".md"+ext, ".md"), "w").write("```"+ext+"\n"+open(p).read()+"```")
+            os.remove(p)
 def main():
     """
     main
     """
+    convertcode = raw_input("Convert python and go sourcecode to md?\n(y/n): ")
+
+    if convertcode.lower() == "y":
+        convertcode = True
+    else:
+        convertcode = False
+
     if not os.path.exists("markdown"):
         print "no markdown folder"
         return
@@ -157,9 +168,15 @@ def main():
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \;")
     print "delete tempfolders"
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-    print "delete py"
+    print "handle py"
+    if convertcode:
+        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.go/.mdpython}"' -- {} \; 2> /dev/null""")
+        convertmdcode("python")
     os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
-    print "delete go"
+    print "handle go files"
+    if convertcode:
+        os.system("""find markdown/ -name '*.go' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.go/.mdgo}"' -- {} \; 2> /dev/null""")
+        convertmdcode("go")
     os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
     os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")

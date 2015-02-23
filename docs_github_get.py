@@ -16,7 +16,7 @@ def get_folder(d, fp):
     if not os.path.exists("markdown/Github_Docs_Readmes/" + d):
         os.mkdir("markdown/Github_Docs_Readmes/" + d)
 
-    #open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+    # open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
     os.system("sudo cp -r " + fp + " markdown/Github_Docs_Readmes/")
     os.system("sudo rm -Rf markdown/Github_Docs_Readmes/" + d + "/.git")
 
@@ -44,7 +44,7 @@ def main():
 
             for interest in special_interests:
                 if interest.lower() in fp.lower():
-                    #raise AssertionError(str(interest))
+                    # raise AssertionError(str(interest))
                     get_folder(d, fp)
                     have_docs = True
 
