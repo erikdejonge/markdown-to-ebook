@@ -128,7 +128,6 @@ def convertmdcode(ext):
     """
     for p in os.popen("find markdown -name  '*.md"+ext+"' -type f").read().split("\n"):
         if os.path.exists(p):
-            print ext
             if ext.lower().strip() == "js":
                 extcss = "javascript"
             else:
