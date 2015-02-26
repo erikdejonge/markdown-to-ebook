@@ -31,13 +31,13 @@ def doconversion(f, folder):
 
         tempfolder = "tempfolder" + uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
-
         try:
             g_lock.acquire()
 
             if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
                 print "\033[32m", "file exists skipping" + os.path.join(cwf, f.replace(".md", ".html")), "\033[0m"
                 return ""
+
             ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
             ebook.wait()
             so, se = ebook.communicate()
