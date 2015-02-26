@@ -146,11 +146,26 @@ def convertmdcode(ext):
         if os.path.exists(p):
             if ext.lower().strip() == "js":
                 extcss = "javascript"
+            elif ext.lower().strip() == "h":
+                extcss = "c"
             else:
                 extcss = ext
 
             open(p.replace(".md" + ext, ".md"), "w").write("```" + extcss + "\n" + open(p).read() + "```")
             os.remove(p)
+
+
+def source_file_rm_or_md(convertcode, targetextension):
+    """
+    @type convertcode: str, unicode
+    @type targetextension: str, unicode
+    @return: None
+    """
+    if convertcode:
+        os.system("""find markdown/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
+        convertmdcode(targetextension)
+    else:
+        os.system("cd markdown/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
 
 
 def main():
@@ -159,8 +174,14 @@ def main():
     """
     parser = ArgumentParser()
     parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
+    parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the markdown archive", action='store_true')
     args, unknown = parser.parse_known_args()
     convertcode = args.convertcode
+
+    if args.restorecode:
+        print "\033[32mbusy restoring markdown folder.\033[0m"
+        shutil.rmtree("markdown")
+        os.system("pigz -d markdown.tar.gz&&tar -xf markdown.tar")
 
     if not os.path.exists("markdown"):
         print "\033[31m", "no markdown folder", "\033[0m"
@@ -170,7 +191,7 @@ def main():
         print "\033[31m", "markdown folder is empty", "\033[0m"
         return
 
-    os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar; rm -f markdown/*.html")
+    os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar;")
     booktitle = "".join(os.listdir("markdown"))
     specialchar = False
     scs = [" ", "&", "?"]
@@ -188,34 +209,16 @@ def main():
         return
 
     print "\033[32m" + booktitle, "\033[0m"
+    print "\033[33m" + "converting", "\033[0m"
+    source_file_rm_or_md(convertcode, "h")
+    source_file_rm_or_md(convertcode, "py")
+    source_file_rm_or_md(convertcode, "go")
+    source_file_rm_or_md(convertcode, "js")
+    source_file_rm_or_md(convertcode, "coffee")
+    source_file_rm_or_md(convertcode, "c")
     print "\033[33m" + "cleaning", "\033[0m"
     os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
-
-    if convertcode:
-        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'mv "$1" "${1/.py/.mdpython}"' -- {} \; 2> /dev/null""")
-        convertmdcode("python")
-    else:
-        os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
-
-    if convertcode:
-        os.system("""find markdown/ -name '*.go' -type f -exec bash -c 'mv "$1" "${1/.go/.mdgo}"' -- {} \; 2> /dev/null""")
-        convertmdcode("go")
-    else:
-        os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
-
-    if convertcode:
-        os.system("""find markdown/ -name '*.js' -type f -exec bash -c 'mv "$1" "${1/.js/.mdjs}"' -- {} \; 2> /dev/null""")
-        convertmdcode("js")
-    else:
-        os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
-
-    if convertcode:
-        os.system("""find markdown/ -name '*.coffee' -type f -exec bash -c 'mv "$1" "${1/.coffee/.mdcoffee}"' -- {} \; 2> /dev/null""")
-        convertmdcode("coffee")
-    else:
-        os.system("cd markdown/*&&sudo find . -name '*.coffee*' -exec rm -rf {} \; 2> /dev/null")
-
     os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
@@ -224,7 +227,8 @@ def main():
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-    print "\033[33m", "done", "\033[0m"
+
+    print "\033[33m", "pandoc", "\033[0m"
     ppool = Pool(multiprocessing.cpu_count())
     convertlist = []
     convert("markdown", ppool, convertlist)
