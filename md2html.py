@@ -32,12 +32,11 @@ def doconversion(f, folder):
         tempfolder = "tempfolder" + uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
 
-
         try:
             g_lock.acquire()
 
             if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
-                print "\033[32m", "file exists skipping"+os.path.join(cwf, f.replace(".md", ".html")), "\033[0m"
+                print "\033[32m", "file exists skipping" + os.path.join(cwf, f.replace(".md", ".html")), "\033[0m"
                 return ""
             ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
             ebook.wait()
@@ -90,7 +89,7 @@ def convert(folder, ppool, convertlist):
                 # doconversion(f, folder)
                 numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
 
-                #if numitems > 0:
+                # if numitems > 0:
                 #    print "convert:", folder, numitems, "items"
                 #ppool.apply_async(doconversion, (f, folder))
                 convertlist.append((f, folder))
@@ -143,14 +142,14 @@ def convertmdcode(ext):
     @type ext: str, unicode
     @return: None
     """
-    for p in os.popen("find markdown -name  '*.md"+ext+"' -type f").read().split("\n"):
+    for p in os.popen("find markdown -name  '*.md" + ext + "' -type f").read().split("\n"):
         if os.path.exists(p):
             if ext.lower().strip() == "js":
                 extcss = "javascript"
             else:
                 extcss = ext
 
-            open(p.replace(".md"+ext, ".md"), "w").write("```"+extcss+"\n"+open(p).read()+"```")
+            open(p.replace(".md" + ext, ".md"), "w").write("```" + extcss + "\n" + open(p).read() + "```")
             os.remove(p)
 
 
@@ -189,7 +188,7 @@ def main():
         return
 
     print "\033[32m" + booktitle, "\033[0m"
-    print "\033[33m"+"cleaning", "\033[0m"
+    print "\033[33m" + "cleaning", "\033[0m"
     os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
 
@@ -230,10 +229,10 @@ def main():
     convertlist = []
     convert("markdown", ppool, convertlist)
 
-    #for i in convertlist:
+    # for i in convertlist:
     #    res = startconversion(i)
     for res in ppool.map(startconversion, convertlist):
-        if len(res.strip())>0:
+        if len(res.strip()) > 0:
             print "\033[31m", res, "\033[0m"
 
     ppool.close()
