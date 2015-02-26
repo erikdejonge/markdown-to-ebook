@@ -54,7 +54,7 @@ def doconversion(f, folder):
                 shutil.copyfile(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
 
         return ""
-    except Exception, e:
+    except Exception as e:
         raise
 
         return str(e)
