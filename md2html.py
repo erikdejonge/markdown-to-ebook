@@ -8,6 +8,7 @@ import shutil
 import uuid
 import multiprocessing
 from multiprocessing.dummy import Pool
+from argparse import ArgumentParser
 
 import subprocess
 from subprocess import Popen
@@ -26,16 +27,18 @@ def doconversion(f, folder):
     try:
         if "tempfolder" in folder:
             print "searching tempfolder, skipping", folder
-            return
+            return ""
 
         tempfolder = "tempfolder" + uuid.uuid4().hex
         cwf = os.path.join(os.getcwd(), folder)
 
-        if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
-            print "file exists skipping", os.path.join(cwf, f.replace(".md", ".html"))
-            return
+
         try:
             g_lock.acquire()
+
+            if os.path.exists(os.path.join(cwf, f.replace(".md", ".html"))):
+                print "\033[32m", "file exists skipping"+os.path.join(cwf, f.replace(".md", ".html")), "\033[0m"
+                return ""
             ebook = Popen(["ebook", "--f", tempfolder, "--source", "./" + f], stderr=subprocess.PIPE, stdout=subprocess.PIPE, cwd=cwf)
             ebook.wait()
             so, se = ebook.communicate()
@@ -43,17 +46,30 @@ def doconversion(f, folder):
             g_lock.release()
 
         res = str(so) + str(se)
-        if len(res.strip()) != 0:
+
+        if len(res.strip()) != 0 or ebook.returncode != 0:
             print 20 * " ", res
         else:
-            print "writing:", os.path.join(cwf, f.replace(".md", ".html"))
-            shutil.copyfile(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
+            if os.path.exists(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html"))):
+                print "\033[33m", "writing:", os.path.join(cwf, f.replace(".md", ".html")), "\033[0m"
+                shutil.copyfile(os.path.join(cwf, tempfolder + "/" + f.replace(".md", ".html")), os.path.join(cwf, f.replace(".md", ".html")))
+
+        return ""
     except Exception, e:
-        print e
         raise
 
+        return str(e)
 
-def convert(folder, ppool):
+
+def startconversion(t):
+    """
+    @type t: str, unicode
+    @return: None
+    """
+    return doconversion(t[0], t[1])
+
+
+def convert(folder, ppool, convertlist):
     """
     @type folder: str, unicode
     @type ppool: multiprocessing.Pool
@@ -62,7 +78,7 @@ def convert(folder, ppool):
     fl = [x for x in os.listdir(folder)]
     for f in fl:
         if os.path.isdir(os.path.join(folder, f)):
-            convert(os.path.join(folder, f), ppool)
+            convert(os.path.join(folder, f), ppool, convertlist)
         else:
             if f.endswith(".md"):
                 fp = os.path.join(folder, f)
@@ -76,7 +92,8 @@ def convert(folder, ppool):
 
                 #if numitems > 0:
                 #    print "convert:", folder, numitems, "items"
-                ppool.apply_async(doconversion, (f, folder))
+                #ppool.apply_async(doconversion, (f, folder))
+                convertlist.append((f, folder))
 
 
 def toc_files(folder, toc):
@@ -141,19 +158,17 @@ def main():
     """
     main
     """
-    convertcode = raw_input("Convert sourcecode (py, go, coffee and js) to md?\n(y/n): ")
-
-    if convertcode.lower() == "y":
-        convertcode = True
-    else:
-        convertcode = False
+    parser = ArgumentParser()
+    parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
+    args, unknown = parser.parse_known_args()
+    convertcode = args.convertcode
 
     if not os.path.exists("markdown"):
-        print "no markdown folder"
+        print "\033[31m", "no markdown folder", "\033[0m"
         return
 
     if len(os.listdir("./markdown")) == 0:
-        print "markdown folder is empty"
+        print "\033[31m", "markdown folder is empty", "\033[0m"
         return
 
     os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar; rm -f markdown/*.html")
@@ -166,64 +181,61 @@ def main():
             specialchard = {1: c,
                             2: booktitle}
 
-            print "directory with special char", specialchard
+            print "\033[31m", "directory with special char", specialchard, "\033[0m"
             specialchar = True
             break
 
     if specialchar is True:
         return
 
-    print 'booktitle', booktitle
-    print "== cleaning =="
-    print "markdown .git folders"
-    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \;")
-    print "delete symlinks"
-    os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \;")
-    print "handle py"
+    print "\033[32m" + booktitle, "\033[0m"
+    print "\033[33m"+"cleaning", "\033[0m"
+    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
+
     if convertcode:
-        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.py/.mdpython}"' -- {} \; 2> /dev/null""")
+        os.system("""find markdown/ -name '*.py' -type f -exec bash -c 'mv "$1" "${1/.py/.mdpython}"' -- {} \; 2> /dev/null""")
         convertmdcode("python")
     else:
         os.system("cd markdown/*&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
 
-    print "handle go files"
     if convertcode:
-        os.system("""find markdown/ -name '*.go' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.go/.mdgo}"' -- {} \; 2> /dev/null""")
+        os.system("""find markdown/ -name '*.go' -type f -exec bash -c 'mv "$1" "${1/.go/.mdgo}"' -- {} \; 2> /dev/null""")
         convertmdcode("go")
     else:
         os.system("cd markdown/*&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
 
-    print "handle js"
     if convertcode:
-        os.system("""find markdown/ -name '*.js' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.js/.mdjs}"' -- {} \; 2> /dev/null""")
+        os.system("""find markdown/ -name '*.js' -type f -exec bash -c 'mv "$1" "${1/.js/.mdjs}"' -- {} \; 2> /dev/null""")
         convertmdcode("js")
     else:
         os.system("cd markdown/*&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
 
-    print "handle coffee"
     if convertcode:
-        os.system("""find markdown/ -name '*.coffee' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.coffee/.mdcoffee}"' -- {} \; 2> /dev/null""")
+        os.system("""find markdown/ -name '*.coffee' -type f -exec bash -c 'mv "$1" "${1/.coffee/.mdcoffee}"' -- {} \; 2> /dev/null""")
         convertmdcode("coffee")
     else:
         os.system("cd markdown/*&&sudo find . -name '*.coffee*' -exec rm -rf {} \; 2> /dev/null")
 
-    print "delete man"
     os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
-    print 'delete commands'
     os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
-    print "delete godeps"
     os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    print "delete empty folders"
     os.system("sudo find markdown -depth -empty -delete")
-    print "convert txt to md"
-    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
-    os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
-    print "delete tempfolders"
+    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+    os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-    print "== done cleaning =="
+    print "\033[33m", "done", "\033[0m"
     ppool = Pool(multiprocessing.cpu_count())
-    convert("markdown", ppool)
+    convertlist = []
+    convert("markdown", ppool, convertlist)
+
+    #for i in convertlist:
+    #    res = startconversion(i)
+    for res in ppool.map(startconversion, convertlist):
+        if len(res.strip())>0:
+            print "\033[31m", res, "\033[0m"
+
     ppool.close()
     ppool.join()
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")

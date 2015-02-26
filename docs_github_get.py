@@ -8,7 +8,6 @@ import os
 
 def get_folder(d, fp):
     """
-
     @type d: str, unicode
     @type fp: str, unicode
     @return: None
