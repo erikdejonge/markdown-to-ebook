@@ -75,10 +75,17 @@ Kindle on Mac
 > ![kindle](resources/kindle.png)
 
 
-##Extra, make an ebook of all your cloned github projects
+##make an ebook of all your cloned github projects
 Run one of the collection scripts, and put the results in the markdown folder, continue at step 1
 
+Checkout [github-star-syncer](https://github.com/erikdejonge/github-stars-syncer)
+
 ```bash
+# run the syncer
+cd ~/workspace/github-stars-syncer
+rm -f starlist.pickle
+python update_stars_github.py
+
 # collects all the readme's from ~/workspace/github into a local github directory
 $ python get_github_readmes.py
 
