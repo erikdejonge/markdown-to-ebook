@@ -161,11 +161,26 @@ def source_file_rm_or_md(convertcode, targetextension):
     @type targetextension: str, unicode
     @return: None
     """
-    if convertcode:
-        os.system("""find markdown/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
-        convertmdcode(targetextension)
+    if targetextension == "rst":
+        print "converting rst"
+
+        for p in os.popen("find markdown -name  *.rst -type f").read().split("\n"):
+            if len(p.strip()) > 0:
+                if os.path.exists(p):
+                    print "rst2md:", p, "->", p.lower().replace(".rst", ".md")
+
+                    if not os.path.exists(p.lower().replace(".rst", ".md")):
+                        os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md"))
+
+                    os.remove(p)
+
+        return
     else:
-        os.system("cd markdown/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
+        if convertcode:
+            os.system("""find markdown/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
+            convertmdcode(targetextension)
+        else:
+            os.system("cd markdown/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
 
 
 def main():
@@ -210,6 +225,7 @@ def main():
 
     print "\033[32m" + booktitle, "\033[0m"
     print "\033[33m" + "converting", "\033[0m"
+    source_file_rm_or_md(convertcode, "rst")
     source_file_rm_or_md(convertcode, "h")
     source_file_rm_or_md(convertcode, "py")
     source_file_rm_or_md(convertcode, "go")
@@ -227,7 +243,6 @@ def main():
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-
     print "\033[33m", "pandoc", "\033[0m"
     ppool = Pool(multiprocessing.cpu_count())
     convertlist = []
