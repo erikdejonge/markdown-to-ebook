@@ -148,6 +148,8 @@ def convertmdcode(ext):
                 extcss = "javascript"
             elif ext.lower().strip() == "h":
                 extcss = "c"
+            elif ext.lower().strip() == "sh":
+                extcss = "bash"
             else:
                 extcss = ext
 
@@ -225,6 +227,7 @@ def main():
 
     print "\033[32m" + booktitle, "\033[0m"
     print "\033[33m" + "converting", "\033[0m"
+    source_file_rm_or_md(convertcode, "sh")
     source_file_rm_or_md(convertcode, "rst")
     source_file_rm_or_md(convertcode, "h")
     source_file_rm_or_md(convertcode, "py")
