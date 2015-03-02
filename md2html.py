@@ -189,6 +189,8 @@ def main():
     """
     main
     """
+    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+    
     parser = ArgumentParser()
     parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
     parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the markdown archive", action='store_true')
@@ -236,13 +238,15 @@ def main():
     source_file_rm_or_md(convertcode, "coffee")
     source_file_rm_or_md(convertcode, "c")
     print "\033[33m" + "cleaning", "\033[0m"
-    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+    
+    
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("sudo find markdown -depth -empty -delete")
+    os.system("""find markdown/ ! -name '*.*' -type f -exec bash -c 'mv "$1" "$1.txt"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
     os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
