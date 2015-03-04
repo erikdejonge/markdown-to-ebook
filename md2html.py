@@ -150,6 +150,9 @@ def convertmdcode(ext):
                 extcss = "c"
             elif ext.lower().strip() == "sh":
                 extcss = "bash"
+            elif ext.lower().strip() == "py":
+                extcss = "python"
+
             else:
                 extcss = ext
 
