@@ -36,38 +36,22 @@ $ python md2html.py
 convert: markdown/GithubReadmeDocs/coffee-script/test/importing 2 items
 ...
 ```
+After conversion an ebook is created with the .mobi extension
+GithubReadmeDocs.mobi
 
-####Step 4
-Open Calibre and click 'add books' 
 
-> ![addbooks](resources/addbooks.png)
-
-####Step 5
-Select the generated table of contents html file
-
-> ![toc](resources/toc.png)
-
-Wait for Calibre reading the files
-
-> ![reading](resources/reading.png)
-
-####Step 6
-Right click the book to convert it
-
-> ![rightclickconvert](resources/rightclickconvert.png)
-
-Optionally right click the ebook to change the metadata
-
-> ![changemetadata](resources/changemetadata.png)
-
-Wait for the converson to finish
-
-> ![working](resources/working.png)
-
-####Step 7
-When done, right click to save the book
-
-> ![savebook](resources/savebook.png)
+#####Optional
+The source code can also be converted with the -c flag, it's using the Github syntax coloring for
+- shell
+- c
+- cpp
+- python
+- go
+- javascript
+- coffeescript
+```bash
+$ python md2html.py -c
+...
 
 ####Result
 Kindle on Mac

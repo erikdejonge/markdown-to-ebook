@@ -152,7 +152,6 @@ def convertmdcode(ext):
                 extcss = "bash"
             elif ext.lower().strip() == "py":
                 extcss = "python"
-
             else:
                 extcss = ext
 
@@ -193,7 +192,6 @@ def main():
     main
     """
     os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
-    
     parser = ArgumentParser()
     parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
     parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the markdown archive", action='store_true')
@@ -214,7 +212,24 @@ def main():
         return
 
     os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar;")
-    booktitle = "".join(os.listdir("markdown"))
+    dirfiles = os.listdir("markdown")
+    dirforname = []
+
+    if len(dirfiles) > 1:
+        for i in dirfiles:
+            if os.path.isdir(os.path.join("markdown", i)):
+                dirforname.append(i)
+
+        if len(dirforname) > 1:
+            print "\033[31m", "more then 1 folder found in the markdown directory, please correct this (one folder is one book)", "\033[0m"
+            return
+
+        if len(dirforname) == 0:
+            print "\033[31m", "no folders found in the markdown directory, please correct this (one folder is one book)", "\033[0m"
+            return
+    else:
+        dirforname = dirfiles
+    booktitle = "".join(dirforname)
     specialchar = False
     scs = [" ", "&", "?"]
 
@@ -241,8 +256,6 @@ def main():
     source_file_rm_or_md(convertcode, "coffee")
     source_file_rm_or_md(convertcode, "c")
     print "\033[33m" + "cleaning", "\033[0m"
-    
-    
     os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
@@ -268,6 +281,8 @@ def main():
     ppool.join()
     os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
     make_toc("markdown", booktitle)
+    print "\033[33m", "converting to ebook", "\033[0m"
+    os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./markdown/" + booktitle + ".html ./markdown/" + booktitle + ".mobi -v --authors=edj")
 
 
 if __name__ == "__main__":
