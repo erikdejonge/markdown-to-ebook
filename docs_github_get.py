@@ -68,14 +68,10 @@ def main():
                     get_folder(d, fp)
                     have_docs = True
 
-            if not have_docs:
-                if ce is True:
-                    os.system("mv " + os.path.join("markdown/Github_Docs_Readmes", d) + " markdown/Github_Docs_Readmes/_Readmes/")
-            else:
-                os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
-                os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-                os.system("cp markdown/Github_Docs_Readmes/" + d + "/README* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-
+            os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
+            os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+            os.system("cp markdown/Github_Docs_Readmes/" + d + "/README* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+    os.system("rm -Rf markdown/Github_Docs_Readmes/_Readmes")
     os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
     print "delete py"
     os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")

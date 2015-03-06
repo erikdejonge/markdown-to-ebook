@@ -70,11 +70,8 @@ cd ~/workspace/github-stars-syncer
 rm -f starlist.pickle
 python update_stars_github.py
 
-# collects all the readme's from ~/workspace/github into a local github directory
-$ python get_github_readmes.py
-
-# collects all the readme's and doc directories from ~/workspace/github into a local github directory
-$ python get_github_readme_and_docs.py
+# collects all the readme's and doc directories from ~/workspace/github
+$ python docs_github_get.py
 ```
 
 
