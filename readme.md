@@ -12,32 +12,23 @@ $ npm install -g ebook
 ```
 
 ####Step 1
-Put md5 files in a folder inside of the markdown directory
+Put md5, rst, txt and code files in folders inside of the bookconversionswaiting directory
+./book1/
+./book2/
 
-```bash
-$ pwd
-~/workspace/research/md2html
 
-$ ls markdown/
-total 0
-0 drwxr-xr-x+   3 rabshakeh  102 Feb 17 15:45 .
-0 drwxr-xr-x+   9 rabshakeh  306 Feb 17 15:45 ..
-0 drwxr-xr-x+ 133 rabshakeh 4.5K Feb 17 15:17 GithubReadmeDocs
-
-$ ls markdown/GithubReadmeDocs | wc
-    134    1199    7748
-```
 
 ####Step 2
 Run the md2html python script, this will convert all .md files to .html, and generates a table of content
 
 ```bash
 $ python md2html.py
-convert: markdown/GithubReadmeDocs/coffee-script/test/importing 2 items
+convert: bookconversionfolder/GithubReadmeDocs/coffee-script/test/importing 2 items
 ...
 ```
-After conversion an ebook is created with the .mobi extension
-GithubReadmeDocs.mobi
+After conversion an ebook is created with the .mobi extension in the books folde
+./books/book1.mobi
+./books/book2.mobi
 
 
 #####Optional
@@ -60,7 +51,7 @@ Kindle on Mac
 
 
 ##make an ebook of all your cloned github projects
-Run one of the collection scripts, and put the results in the markdown folder, continue at step 1
+Run one of the collection scripts, and put the results in the bookconversionfolder folder, continue at step 1
 
 Checkout [github-star-syncer](https://github.com/erikdejonge/github-stars-syncer)
 

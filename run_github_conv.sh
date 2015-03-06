@@ -1,4 +1,4 @@
 #!/bin/sh
-rm -Rf markdown/*
+rm -Rf bookconversionfolder/*
 python docs_github_get.py
 python md2html.py

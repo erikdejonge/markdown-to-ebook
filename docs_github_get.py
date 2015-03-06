@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-convert markdown/Github_Docs_Readmes to html
+convert bookconversionfolder/Github_Docs_Readmes to html
 """
 
 import os
@@ -12,21 +12,21 @@ def get_folder(d, fp):
     @type fp: str, unicode
     @return: None
     """
-    if not os.path.exists("markdown/Github_Docs_Readmes/" + d):
-        os.mkdir("markdown/Github_Docs_Readmes/" + d)
+    if not os.path.exists("bookconversionfolder/Github_Docs_Readmes/" + d):
+        os.mkdir("bookconversionfolder/Github_Docs_Readmes/" + d)
 
-    # open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
-    os.system("sudo cp -r " + fp + " markdown/Github_Docs_Readmes/")
-    os.system("sudo rm -Rf markdown/Github_Docs_Readmes/" + d + "/.git")
+    # open("bookconversionfolder/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+    os.system("sudo cp -r " + fp + " bookconversionfolder/Github_Docs_Readmes/")
+    os.system("sudo rm -Rf bookconversionfolder/Github_Docs_Readmes/" + d + "/.git")
 
 
 def main():
     """
     main
     """
-    os.system("rm -f markdown/*.html")
+    os.system("rm -f bookconversionfolder/*.html")
     special_interests = ["kubernetes", "coreos", "docker", "redis", "etcd", "celery"]
-    os.system("sudo rm -Rf markdown/Github_Docs_Readmes&&mkdir -p markdown/Github_Docs_Readmes/_Readmes")
+    os.system("sudo rm -Rf bookconversionfolder/Github_Docs_Readmes&&mkdir -p bookconversionfolder/Github_Docs_Readmes/_Readmes")
     bs = os.path.expanduser("~/workspace/github")
 
     for d in os.listdir(bs):
@@ -57,8 +57,8 @@ def main():
                         c = open(rm).read()
 
                 if ce:
-                    os.mkdir("markdown/Github_Docs_Readmes/" + d)
-                    open("markdown/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+                    os.mkdir("bookconversionfolder/Github_Docs_Readmes/" + d)
+                    open("bookconversionfolder/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
 
                 if os.path.exists(docs):
                     get_folder(d, fp)
@@ -68,26 +68,26 @@ def main():
                     get_folder(d, fp)
                     have_docs = True
 
-            os.mkdir("markdown/Github_Docs_Readmes/_Readmes/" + d)
-            os.system("cp markdown/Github_Docs_Readmes/" + d + "/readme* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-            os.system("cp markdown/Github_Docs_Readmes/" + d + "/README* markdown/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-    os.system("rm -Rf markdown/Github_Docs_Readmes/_Readmes")
-    os.system("sudo chown -R `whoami` markdown/Github_Docs_Readmes")
+            os.mkdir("bookconversionfolder/Github_Docs_Readmes/_Readmes/" + d)
+            os.system("cp bookconversionfolder/Github_Docs_Readmes/" + d + "/readme* bookconversionfolder/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+            os.system("cp bookconversionfolder/Github_Docs_Readmes/" + d + "/README* bookconversionfolder/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+    os.system("rm -Rf bookconversionfolder/Github_Docs_Readmes/_Readmes")
+    os.system("sudo chown -R `whoami` bookconversionfolder/Github_Docs_Readmes")
     print "delete py"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print "delete go"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print "delete js"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
     print 'delete html'
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
     print "delete godeps"
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    os.system("cd markdown/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
     print "delete empty folders"
-    os.system("sudo find markdown -depth -empty -delete")
+    os.system("sudo find bookconversionfolder -depth -empty -delete")
     print "convert txt to md"
-    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+    os.system("""find bookconversionfolder/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
 
 
 if __name__ == "__main__":

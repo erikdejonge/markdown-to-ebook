@@ -111,7 +111,7 @@ def toc_files(folder, toc):
                 dname = dname.split("/")
                 dname = dname[2:]
                 dname = "/".join(dname)
-                toc += '<a href="' + os.path.join(folder, f).replace("markdown", "").lstrip("/") + '">' + dname.replace("markdown", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
+                toc += '<a href="' + os.path.join(folder, f).replace("bookconversionfolder", "").lstrip("/") + '">' + dname.replace("bookconversionfolder", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
 
     return toc
 
@@ -142,7 +142,7 @@ def convertmdcode(ext):
     @type ext: str, unicode
     @return: None
     """
-    for p in os.popen("find markdown -name  '*.md" + ext + "' -type f").read().split("\n"):
+    for p in os.popen("find bookconversionfolder -name  '*.md" + ext + "' -type f").read().split("\n"):
         if os.path.exists(p):
             if ext.lower().strip() == "js":
                 extcss = "javascript"
@@ -168,7 +168,7 @@ def source_file_rm_or_md(convertcode, targetextension):
     if targetextension == "rst":
         print "converting rst"
 
-        for p in os.popen("find markdown -name  *.rst -type f").read().split("\n"):
+        for p in os.popen("find bookconversionfolder -name  *.rst -type f").read().split("\n"):
             if len(p.strip()) > 0:
                 if os.path.exists(p):
                     print "rst2md:", p, "->", p.lower().replace(".rst", ".md")
@@ -181,108 +181,142 @@ def source_file_rm_or_md(convertcode, targetextension):
         return
     else:
         if convertcode:
-            os.system("""find markdown/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
+            os.system("""find bookconversionfolder/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
             convertmdcode(targetextension)
         else:
-            os.system("cd markdown/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
+            os.system("cd bookconversionfolder/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
+
+
+def got_books_to_convert(converted):
+    """
+    got_books_to_convert
+    """
+    dirfiles = os.listdir("bookconversionswaiting")
+    dirs = []
+
+    if len(dirfiles) > 0:
+        for i in dirfiles:
+            if os.path.isdir(os.path.join("bookconversionswaiting", i)):
+                if i not in converted:
+                    dirs.append(i)
+                    converted.append(i)
+
+        if len(dirs) > 0:
+            return dirs.pop()
+
+    return None
 
 
 def main():
     """
     main
     """
-    os.system("sudo find ./markdown/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
-    parser = ArgumentParser()
-    parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
-    parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the markdown archive", action='store_true')
-    args, unknown = parser.parse_known_args()
-    convertcode = args.convertcode
 
-    if args.restorecode:
-        print "\033[32mbusy restoring markdown folder.\033[0m"
-        shutil.rmtree("markdown")
-        os.system("pigz -d markdown.tar.gz&&tar -xf markdown.tar")
+    os.system("rm -Rf ./bookconversionfolder/*")
+    converted = []
+    book = got_books_to_convert(converted)
 
-    if not os.path.exists("markdown"):
-        print "\033[31m", "no markdown folder", "\033[0m"
-        return
+    while book:
+        os.system("cp -r bookconversionswaiting/" + book + " ./bookconversionfolder/")
+        os.system("sudo find ./bookconversionfolder/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+        parser = ArgumentParser()
+        parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
+        parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the bookconversionfolder archive", action='store_true')
+        args, unknown = parser.parse_known_args()
+        convertcode = args.convertcode
 
-    if len(os.listdir("./markdown")) == 0:
-        print "\033[31m", "markdown folder is empty", "\033[0m"
-        return
+        if args.restorecode:
+            print "\033[32mbusy restoring bookconversionfolder folder.\033[0m"
+            shutil.rmtree("bookconversionfolder")
+            os.system("pigz -d bookconversionfolder.tar.gz&&tar -xf bookconversionfolder.tar")
 
-    os.system("rm -f markdown.tar.gz; tar -cf markdown.tar ./markdown; pigz markdown.tar;")
-    dirfiles = os.listdir("markdown")
-    dirforname = []
-
-    if len(dirfiles) > 1:
-        for i in dirfiles:
-            if os.path.isdir(os.path.join("markdown", i)):
-                dirforname.append(i)
-
-        if len(dirforname) > 1:
-            print "\033[31m", "more then 1 folder found in the markdown directory, please correct this (one folder is one book)", "\033[0m"
+        if not os.path.exists("bookconversionfolder"):
+            print "\033[31m", "no bookconversionfolder folder", "\033[0m"
             return
 
-        if len(dirforname) == 0:
-            print "\033[31m", "no folders found in the markdown directory, please correct this (one folder is one book)", "\033[0m"
+        if len(os.listdir("./bookconversionfolder")) == 0:
+            print "\033[31m", "bookconversionfolder folder is empty", "\033[0m"
             return
-    else:
-        dirforname = dirfiles
-    booktitle = "".join(dirforname)
-    specialchar = False
-    scs = [" ", "&", "?"]
 
-    for c in scs:
-        if c in booktitle.strip():
-            specialchard = {1: c,
-                            2: booktitle}
+        os.system("rm -f bookconversionfolder.tar.gz; tar -cf bookconversionfolder.tar ./bookconversionfolder; pigz bookconversionfolder.tar;")
+        dirfiles = os.listdir("bookconversionfolder")
+        dirforname = []
 
-            print "\033[31m", "directory with special char", specialchard, "\033[0m"
-            specialchar = True
-            break
+        if len(dirfiles) > 1:
+            for i in dirfiles:
+                if os.path.isdir(os.path.join("bookconversionfolder", i)):
+                    dirforname.append(i)
 
-    if specialchar is True:
-        return
+            if len(dirforname) > 1:
+                print "\033[31m", "more then 1 folder found in the bookconversionfolder directory, please correct this (one folder is one book)", "\033[0m"
+                return
 
-    print "\033[32m" + booktitle, "\033[0m"
-    print "\033[33m" + "converting", "\033[0m"
-    source_file_rm_or_md(convertcode, "sh")
-    source_file_rm_or_md(convertcode, "rst")
-    source_file_rm_or_md(convertcode, "h")
-    source_file_rm_or_md(convertcode, "py")
-    source_file_rm_or_md(convertcode, "go")
-    source_file_rm_or_md(convertcode, "js")
-    source_file_rm_or_md(convertcode, "coffee")
-    source_file_rm_or_md(convertcode, "c")
-    print "\033[33m" + "cleaning", "\033[0m"
-    os.system("cd markdown/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
-    os.system("cd markdown/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
-    os.system("cd markdown/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
-    os.system("cd markdown/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    os.system("cd markdown/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    os.system("sudo find markdown -depth -empty -delete")
-    os.system("""find markdown/ ! -name '*.*' -type f -exec bash -c 'mv "$1" "$1.txt"' -- {} \; 2> /dev/null""")
-    os.system("""find markdown/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
-    os.system("""find markdown/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
-    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-    print "\033[33m", "pandoc", "\033[0m"
-    ppool = Pool(multiprocessing.cpu_count())
-    convertlist = []
-    convert("markdown", ppool, convertlist)
+            if len(dirforname) == 0:
+                print "\033[31m", "no folders found in the bookconversionfolder directory, please correct this (one folder is one book)", "\033[0m"
+                return
+        else:
+            dirforname = dirfiles
 
-    # for i in convertlist:
-    #    res = startconversion(i)
-    for res in ppool.map(startconversion, convertlist):
-        if len(res.strip()) > 0:
-            print "\033[31m", res, "\033[0m"
+        booktitle = "".join(dirforname)
+        specialchar = False
+        scs = [" ", "&", "?"]
 
-    ppool.close()
-    ppool.join()
-    os.system("cd markdown/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-    make_toc("markdown", booktitle)
-    print "\033[33m", "converting to ebook", "\033[0m"
-    os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./markdown/" + booktitle + ".html ./markdown/" + booktitle + ".mobi -v --authors=edj")
+        for c in scs:
+            if c in booktitle.strip():
+                specialchard = {1: c,
+                                2: booktitle}
+
+                print "\033[31m", "directory with special char", specialchard, "\033[0m"
+                specialchar = True
+                break
+
+        if specialchar is True:
+            return
+
+        print "\033[32m" + booktitle, "\033[0m"
+        print "\033[33m" + "converting", "\033[0m"
+        source_file_rm_or_md(convertcode, "sh")
+        source_file_rm_or_md(convertcode, "rst")
+        source_file_rm_or_md(convertcode, "h")
+        source_file_rm_or_md(convertcode, "py")
+        source_file_rm_or_md(convertcode, "go")
+        source_file_rm_or_md(convertcode, "js")
+        source_file_rm_or_md(convertcode, "coffee")
+        source_file_rm_or_md(convertcode, "c")
+        print "\033[33m" + "cleaning", "\033[0m"
+        os.system("cd bookconversionfolder/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
+        os.system("cd bookconversionfolder/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookconversionfolder/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookconversionfolder/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookconversionfolder/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
+        os.system("sudo find bookconversionfolder -depth -empty -delete")
+        os.system("""find bookconversionfolder/ ! -name '*.*' -type f -exec bash -c 'mv "$1" "$1.txt"' -- {} \; 2> /dev/null""")
+        os.system("""find bookconversionfolder/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+        os.system("""find bookconversionfolder/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
+        os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+        print "\033[33m", "pandoc", "\033[0m"
+        ppool = Pool(multiprocessing.cpu_count())
+        convertlist = []
+        convert("bookconversionfolder", ppool, convertlist)
+
+        # for i in convertlist:
+        #    res = startconversion(i)
+        for res in ppool.map(startconversion, convertlist):
+            if len(res.strip()) > 0:
+                print "\033[31m", res, "\033[0m"
+
+        ppool.close()
+        ppool.join()
+        os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+        make_toc("bookconversionfolder", booktitle)
+        print "\033[33m", "converting to ebook", "\033[0m"
+        os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
+        #os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
+        #--paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
+        os.system("mv ./bookconversionfolder/*.mobi ./books/")
+        os.system("mv ./bookconversionfolder/*.pdf ./books/")
+        os.system("rm -Rf ./bookconversionfolder/*")
+        book = got_books_to_convert(converted)
 
 
 if __name__ == "__main__":
