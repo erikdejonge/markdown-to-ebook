@@ -2,6 +2,8 @@ todo
 bookconversionfolder.tar.gz
 github/*
 bookconversionfolder/*
+bookconversionswaiting/*
+books/*
 .idea
 # Byte-compiled / optimized / DLL files
 __pycache__/
