@@ -23,6 +23,7 @@ def doconversion(f, folder):
     @type folder: str, unicode
     @return: None
     """
+    return ""
     global g_lock
     try:
         if "tempfolder" in folder:
@@ -191,32 +192,35 @@ def got_books_to_convert(converted):
     """
     got_books_to_convert
     """
+
     dirfiles = os.listdir("bookconversionswaiting")
-    dirs = []
+    currentdir = None
 
     if len(dirfiles) > 0:
         for i in dirfiles:
             if os.path.isdir(os.path.join("bookconversionswaiting", i)):
-                if i not in converted:
-                    dirs.append(i)
+                if i not in converted and currentdir is None:
+                    currentdir = i
+
                     converted.append(i)
 
-        if len(dirs) > 0:
-            return dirs.pop()
 
-    return None
+    return currentdir
 
 
 def main():
     """
     main
     """
-
     os.system("rm -Rf ./bookconversionfolder/*")
     converted = []
     book = got_books_to_convert(converted)
 
     while book:
+
+
+
+
         os.system("cp -r bookconversionswaiting/" + book + " ./bookconversionfolder/")
         os.system("sudo find ./bookconversionfolder/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
         parser = ArgumentParser()
@@ -299,8 +303,8 @@ def main():
         convertlist = []
         convert("bookconversionfolder", ppool, convertlist)
 
-        # for i in convertlist:
-        #    res = startconversion(i)
+        for i in convertlist:
+           res = startconversion(i)
         for res in ppool.map(startconversion, convertlist):
             if len(res.strip()) > 0:
                 print "\033[31m", res, "\033[0m"
@@ -310,13 +314,17 @@ def main():
         os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
         make_toc("bookconversionfolder", booktitle)
         print "\033[33m", "converting to ebook", "\033[0m"
+
         os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
-        #os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
+        # os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
         #--paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
         os.system("mv ./bookconversionfolder/*.mobi ./books/")
         os.system("mv ./bookconversionfolder/*.pdf ./books/")
+
         os.system("rm -Rf ./bookconversionfolder/*")
         book = got_books_to_convert(converted)
+        if book:
+            print "-------"
 
 
 if __name__ == "__main__":
