@@ -2,6 +2,13 @@
 """
 convert bookconversionfolder/Github_Docs_Readmes to html
 """
+from __future__ import print_function
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from builtins import open
+from future import standard_library
+standard_library.install_aliases()
 
 import os
 
@@ -32,7 +39,7 @@ def main():
     for d in os.listdir(bs):
         have_docs = False
         fp = os.path.join(os.path.expanduser("~/workspace/github"), d)
-        print fp
+        print(fp)
         if os.path.isdir(fp):
             rm1 = os.path.join(fp, "readme.md")
             rm2 = os.path.join(fp, "readme.txt")
@@ -73,20 +80,20 @@ def main():
             os.system("cp bookconversionfolder/Github_Docs_Readmes/" + d + "/README* bookconversionfolder/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
     os.system("rm -Rf bookconversionfolder/Github_Docs_Readmes/_Readmes")
     os.system("sudo chown -R `whoami` bookconversionfolder/Github_Docs_Readmes")
-    print "delete py"
+    print("delete py")
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
-    print "delete go"
+    print("delete go")
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
-    print "delete js"
+    print("delete js")
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
-    print 'delete html'
+    print('delete html')
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
-    print "delete godeps"
+    print("delete godeps")
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd bookconversionfolder/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    print "delete empty folders"
+    print("delete empty folders")
     os.system("sudo find bookconversionfolder -depth -empty -delete")
-    print "convert txt to md"
+    print("convert txt to md")
     os.system("""find bookconversionfolder/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
 
 
