@@ -323,7 +323,7 @@ def main():
             --paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
             os.system("mv ./bookconversionfolder/*.pdf ./books/")
 
-        #os.system("rm -Rf ./bookconversionfolder/*")
+        os.system("rm -Rf ./bookconversionfolder/*")
         book = got_books_to_convert(converted)
 
         if book:
