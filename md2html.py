@@ -92,8 +92,8 @@ def convert(folder, ppool, convertlist):
         else:
             if f.endswith(".md"):
                 fp = os.path.join(folder, f)
-                c = open(fp).read()
-                fp2 = open(fp, "w")
+                c = open(str(fp),"rt").read()
+                fp2 = open(fp, "wt")
                 fp2.write(c.replace(".md", ".html"))
                 fp2.close()
 
@@ -145,7 +145,7 @@ def make_toc(folder, bookname):
            </body>
         </html>"""
 
-    open(folder + "/" + bookname.replace("_", " ") + ".html", "w").write(toc)
+    open(folder + "/" + bookname.replace("_", " ") + ".html", "wt").write(toc)
 
 
 def convertmdcode(ext):
@@ -248,6 +248,7 @@ def main():
     while book:
         os.system("cp -r bookconversionswaiting/" + book + " ./bookconversionfolder/")
         os.system("sudo find ./bookconversionfolder/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+        os.system("sudo find ./bookconversionfolder/* -name '.hg' -exec rm -rf {} \; 2> /dev/null")
         dirfiles = os.listdir("bookconversionfolder")
         dirforname = []
 
