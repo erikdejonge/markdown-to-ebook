@@ -225,7 +225,7 @@ def main():
     args, unknown = parser.parse_known_args()
 
     if args.restorecode:
-        console("busy restoring bookconversionfolder folder.", color="gree")
+        console("busy restoring bookconversionfolder folder.", color="green")
 
         if os.path.exists("bookconversionfolder"):
             shutil.rmtree("bookconversionfolder")
@@ -321,14 +321,16 @@ def main():
         console("converting to ebook", color="yellow")
         pdf = True
         os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
-        os.system("mv ./bookconversionfolder/*.mobi ./books/")
+
 
         if pdf:
             os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
             --paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
-            os.system("mv ./bookconversionfolder/*.pdf ./books/")
+            #os.system("mv ./bookconversionfolder/*.pdf ./books/")
 
-        os.system("rm -Rf ./bookconversionfolder/*")
+        #os.system("rm -Rf ./bookconversionfolder/*")
+        os.system("rm -Rf ./books/"+booktitle)
+        os.system("mv -f ./bookconversionfolder/* ./books/")
         book = got_books_to_convert(converted)
 
         if book:
