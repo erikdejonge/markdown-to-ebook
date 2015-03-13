@@ -20,7 +20,7 @@ from argparse import ArgumentParser
 import subprocess
 from subprocess import Popen
 from threading import Lock
-from consoleprinter import console
+from consoleprinter import console, console_warning
 
 g_lock = Lock()
 
@@ -92,10 +92,19 @@ def convert(folder, ppool, convertlist):
         else:
             if f.endswith(".md"):
                 fp = os.path.join(folder, f)
-                c = open(str(fp),"rt").read()
-                fp2 = open(fp, "wt")
-                fp2.write(c.replace(".md", ".html"))
-                fp2.close()
+                try:
+                    c = open(str(fp),"rt").read()
+                except UnicodeDecodeError:
+                    c = open(str(fp), "rb").read()
+                    try:
+                        c = c.decode("utf-8")
+                    except UnicodeDecodeError:
+                        console_warning("could not read", fp)
+                        c = None
+                if c is not None:
+                    fp2 = open(fp, "wt")
+                    fp2.write(c.replace(".md", ".html"))
+                    fp2.close()
 
                 # doconversion(f, folder)
                 numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
