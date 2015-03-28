@@ -300,6 +300,7 @@ def main():
         source_file_rm_or_md(convertcode, "py")
         source_file_rm_or_md(convertcode, "go")
         source_file_rm_or_md(convertcode, "js")
+        source_file_rm_or_md(convertcode, "json")
         source_file_rm_or_md(convertcode, "coffee")
         source_file_rm_or_md(convertcode, "c")
         console("cleaning", color="yellow")
