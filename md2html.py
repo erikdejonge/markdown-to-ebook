@@ -1,28 +1,87 @@
+#!/usr/bin/env python3
 # coding=utf-8
 """
 convert markdown to html
 """
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from builtins import open
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
 
+from __future__ import absolute_import, division, unicode_literals
+
+from future import standard_library
+
+import multiprocessing
 import os
 import shutil
-import uuid
-import multiprocessing
-from multiprocessing.dummy import Pool
-from argparse import ArgumentParser
-
 import subprocess
-from subprocess import Popen
+import uuid
+
+from argparse import ArgumentParser
 from threading import Lock
+from subprocess import Popen
 from consoleprinter import console, console_warning
+from multiprocessing.dummy import Pool
+
+standard_library.install_aliases()
+
 
 g_lock = Lock()
+
+
+def convert(folder, ppool, convertlist):
+    """
+    @type folder: str, unicode
+    @type ppool: multiprocessing.Pool
+    @return: None
+    """
+    fl = [x for x in os.listdir(folder)]
+    for f in fl:
+        if os.path.isdir(os.path.join(folder, f)):
+            convert(os.path.join(folder, f), ppool, convertlist)
+        else:
+            if f.endswith(".md"):
+                fp = os.path.join(folder, f)
+                try:
+                    c = open(str(fp),"rt").read()
+                except UnicodeDecodeError:
+                    c = open(str(fp), "rb").read()
+                    try:
+                        c = c.decode("utf-8")
+                    except UnicodeDecodeError:
+                        console_warning("could not read", fp)
+                        c = None
+                if c is not None:
+                    fp2 = open(fp, "wt")
+                    fp2.write(c.replace(".md", ".html"))
+                    fp2.close()
+
+                # doconversion(f, folder)
+                numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
+
+                # if numitems > 0:
+                #    console "convert:", folder, numitems, "items"
+                #ppool.apply_async(doconversion, (f, folder))
+                convertlist.append((f, folder))
+
+
+def convertmdcode(ext):
+    """
+    @type ext: str, unicode
+    @return: None
+    """
+    for p in os.popen("find bookconversionfolder -name  '*.md" + ext + "' -type f").read().split("\n"):
+        if os.path.exists(p):
+            if ext.lower().strip() == "js":
+                extcss = "javascript"
+            elif ext.lower().strip() == "h":
+                extcss = "c"
+            elif ext.lower().strip() == "sh":
+                extcss = "bash"
+            elif ext.lower().strip() == "py":
+                extcss = "python"
+            else:
+                extcss = ext
+
+            open(p.replace(".md" + ext, ".md"), "w").write("```" + extcss + "\n" + open(p).read() + "```")
+            os.remove(p)
 
 
 def doconversion(f, folder):
@@ -69,142 +128,6 @@ def doconversion(f, folder):
         raise
 
         return str(e)
-
-
-def startconversion(t):
-    """
-    @type t: str, unicode
-    @return: None
-    """
-    return doconversion(t[0], t[1])
-
-
-def convert(folder, ppool, convertlist):
-    """
-    @type folder: str, unicode
-    @type ppool: multiprocessing.Pool
-    @return: None
-    """
-    fl = [x for x in os.listdir(folder)]
-    for f in fl:
-        if os.path.isdir(os.path.join(folder, f)):
-            convert(os.path.join(folder, f), ppool, convertlist)
-        else:
-            if f.endswith(".md"):
-                fp = os.path.join(folder, f)
-                try:
-                    c = open(str(fp),"rt").read()
-                except UnicodeDecodeError:
-                    c = open(str(fp), "rb").read()
-                    try:
-                        c = c.decode("utf-8")
-                    except UnicodeDecodeError:
-                        console_warning("could not read", fp)
-                        c = None
-                if c is not None:
-                    fp2 = open(fp, "wt")
-                    fp2.write(c.replace(".md", ".html"))
-                    fp2.close()
-
-                # doconversion(f, folder)
-                numitems = len([x for x in os.listdir(folder) if x.endswith(".md")])
-
-                # if numitems > 0:
-                #    console "convert:", folder, numitems, "items"
-                #ppool.apply_async(doconversion, (f, folder))
-                convertlist.append((f, folder))
-
-
-def toc_files(folder, toc):
-    """
-    @type folder: str, unicode
-    @type toc: str, unicode
-    @return: None
-    """
-    fl = [x for x in os.listdir(folder)]
-    for f in fl:
-        if os.path.isdir(os.path.join(folder, f)):
-            toc = toc_files(os.path.join(folder, f), toc)
-        else:
-            if f.endswith(".html"):
-                dname = os.path.join(folder, f)
-                dname = dname.split("/")
-                dname = dname[2:]
-                dname = "/".join(dname)
-                toc += '<a href="' + os.path.join(folder, f).replace("bookconversionfolder", "").lstrip("/") + '">' + dname.replace("bookconversionfolder", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
-
-    return toc
-
-
-def make_toc(folder, bookname):
-    """
-    @type folder: str, unicode
-    @type bookname: str, unicode
-    @return: None
-    """
-    toc = """
-        <html>
-           <body>
-             <h1>Table of Contents</h1>
-             <p style="text-indent:0pt">
-     """
-    toc = toc_files(folder, toc)
-    toc += """
-             </p>
-           </body>
-        </html>"""
-
-    open(folder + "/" + bookname.replace("_", " ") + ".html", "wt").write(toc)
-
-
-def convertmdcode(ext):
-    """
-    @type ext: str, unicode
-    @return: None
-    """
-    for p in os.popen("find bookconversionfolder -name  '*.md" + ext + "' -type f").read().split("\n"):
-        if os.path.exists(p):
-            if ext.lower().strip() == "js":
-                extcss = "javascript"
-            elif ext.lower().strip() == "h":
-                extcss = "c"
-            elif ext.lower().strip() == "sh":
-                extcss = "bash"
-            elif ext.lower().strip() == "py":
-                extcss = "python"
-            else:
-                extcss = ext
-
-            open(p.replace(".md" + ext, ".md"), "w").write("```" + extcss + "\n" + open(p).read() + "```")
-            os.remove(p)
-
-
-def source_file_rm_or_md(convertcode, targetextension):
-    """
-    @type convertcode: str, unicode
-    @type targetextension: str, unicode
-    @return: None
-    """
-    if targetextension == "rst":
-        console("converting rst")
-
-        for p in os.popen("find bookconversionfolder -name  *.rst -type f").read().split("\n"):
-            if len(p.strip()) > 0:
-                if os.path.exists(p):
-                    console("rst2md:", p, "->", p.lower().replace(".rst", ".md"))
-
-                    if not os.path.exists(p.lower().replace(".rst", ".md")):
-                        os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md"))
-
-                    os.remove(p)
-
-        return
-    else:
-        if convertcode:
-            os.system("""find bookconversionfolder/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
-            convertmdcode(targetextension)
-        else:
-            os.system("cd bookconversionfolder/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
 
 
 def got_books_to_convert(converted):
@@ -348,6 +271,84 @@ def main():
             console("-------")
 
     os.system("rm -Rf ./bookconversionswaiting/*")
+
+
+def make_toc(folder, bookname):
+    """
+    @type folder: str, unicode
+    @type bookname: str, unicode
+    @return: None
+    """
+    toc = """
+        <html>
+           <body>
+             <h1>Table of Contents</h1>
+             <p style="text-indent:0pt">
+     """
+    toc = toc_files(folder, toc)
+    toc += """
+             </p>
+           </body>
+        </html>"""
+
+    open(folder + "/" + bookname.replace("_", " ") + ".html", "wt").write(toc)
+
+
+def source_file_rm_or_md(convertcode, targetextension):
+    """
+    @type convertcode: str, unicode
+    @type targetextension: str, unicode
+    @return: None
+    """
+    if targetextension == "rst":
+        console("converting rst")
+
+        for p in os.popen("find bookconversionfolder -name  *.rst -type f").read().split("\n"):
+            if len(p.strip()) > 0:
+                if os.path.exists(p):
+                    console("rst2md:", p, "->", p.lower().replace(".rst", ".md"))
+
+                    if not os.path.exists(p.lower().replace(".rst", ".md")):
+                        os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md"))
+
+                    os.remove(p)
+
+        return
+    else:
+        if convertcode:
+            os.system("""find bookconversionfolder/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
+            convertmdcode(targetextension)
+        else:
+            os.system("cd bookconversionfolder/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
+
+
+def startconversion(t):
+    """
+    @type t: str, unicode
+    @return: None
+    """
+    return doconversion(t[0], t[1])
+
+
+def toc_files(folder, toc):
+    """
+    @type folder: str, unicode
+    @type toc: str, unicode
+    @return: None
+    """
+    fl = [x for x in os.listdir(folder)]
+    for f in fl:
+        if os.path.isdir(os.path.join(folder, f)):
+            toc = toc_files(os.path.join(folder, f), toc)
+        else:
+            if f.endswith(".html"):
+                dname = os.path.join(folder, f)
+                dname = dname.split("/")
+                dname = dname[2:]
+                dname = "/".join(dname)
+                toc += '<a href="' + os.path.join(folder, f).replace("bookconversionfolder", "").lstrip("/") + '">' + dname.replace("bookconversionfolder", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
+
+    return toc
 
 
 if __name__ == "__main__":
