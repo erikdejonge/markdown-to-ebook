@@ -253,7 +253,7 @@ def main():
         os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
         make_toc("bookconversionfolder", booktitle)
         console("converting to ebook", color="yellow")
-        pdf = False
+        pdf = True
         os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
 
 
