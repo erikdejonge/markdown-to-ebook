@@ -3,9 +3,7 @@
 """
 convert markdown to html
 """
-
 from __future__ import absolute_import, division, unicode_literals
-
 from future import standard_library
 
 import multiprocessing
@@ -19,9 +17,7 @@ from threading import Lock
 from subprocess import Popen
 from consoleprinter import console, console_warning
 from multiprocessing.dummy import Pool
-
 standard_library.install_aliases()
-
 
 g_lock = Lock()
 
@@ -40,7 +36,7 @@ def convert(folder, ppool, convertlist):
             if f.endswith(".md"):
                 fp = os.path.join(folder, f)
                 try:
-                    c = open(str(fp),"rt").read()
+                    c = open(str(fp), "rt").read()
                 except UnicodeDecodeError:
                     c = open(str(fp), "rb").read()
                     try:
@@ -48,6 +44,7 @@ def convert(folder, ppool, convertlist):
                     except UnicodeDecodeError:
                         console_warning("could not read", fp)
                         c = None
+
                 if c is not None:
                     fp2 = open(fp, "wt")
                     fp2.write(c.replace(".md", ".html"))
@@ -58,7 +55,7 @@ def convert(folder, ppool, convertlist):
 
                 # if numitems > 0:
                 #    console "convert:", folder, numitems, "items"
-                #ppool.apply_async(doconversion, (f, folder))
+                # ppool.apply_async(doconversion, (f, folder))
                 convertlist.append((f, folder))
 
 
@@ -226,6 +223,7 @@ def main():
         source_file_rm_or_md(convertcode, "json")
         source_file_rm_or_md(convertcode, "coffee")
         source_file_rm_or_md(convertcode, "c")
+
         console("cleaning", color="yellow")
         os.system("cd bookconversionfolder/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
         os.system("cd bookconversionfolder/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
@@ -237,6 +235,7 @@ def main():
         os.system("""find bookconversionfolder/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
         os.system("""find bookconversionfolder/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
         os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+
         console("pandoc", color="yellow")
         ppool = Pool(multiprocessing.cpu_count())
         convertlist = []
@@ -250,20 +249,20 @@ def main():
 
         ppool.close()
         ppool.join()
+
         os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
         make_toc("bookconversionfolder", booktitle)
         console("converting to ebook", color="yellow")
         pdf = False
         os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
-
-
         if pdf:
             os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
             --paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
-            #os.system("mv ./bookconversionfolder/*.pdf ./books/")
 
-        #os.system("rm -Rf ./bookconversionfolder/*")
-        os.system("rm -Rf ./books/"+booktitle)
+            # os.system("mv ./bookconversionfolder/*.pdf ./books/")
+
+        # os.system("rm -Rf ./bookconversionfolder/*")
+        os.system("rm -Rf ./books/" + booktitle)
         os.system("mv -f ./bookconversionfolder/* ./books/")
         book = got_books_to_convert(converted)
 
@@ -310,7 +309,32 @@ def source_file_rm_or_md(convertcode, targetextension):
 
                     if not os.path.exists(p.lower().replace(".rst", ".md")):
                         os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md"))
+                        try:
+                            codebuf = [x for x in open(p.lower().replace(".rst", ".md"))]
+                            codebuf.append("")
+                            codebuf.append("")
+                            codebuf.append("")
+                            codebuf.append("")
+                            cnt = 0
+                            codebuf2 = ""
 
+                            for l in codebuf:
+                                if "sourceCode" in l:
+                                    if "$" in codebuf[cnt + 1]:
+                                        l = l.replace("sourceCode", "bash")
+                                    elif ">" in codebuf[cnt + 1]:
+                                        l = l.replace("sourceCode", "bash")
+                                    else:
+                                        l = l.replace("sourceCode", "python")
+
+                                codebuf2 += l
+                                cnt += 1
+
+                            open(p.lower().replace(".rst", ".md"), "w").write(codebuf2)
+                        except:
+                            codebuf = open(p.lower().replace(".rst", ".md")).read()
+                            codebuf = codebuf.replace("sourceCode", "python")
+                            open(p.lower().replace(".rst", ".md", "w")).write(codebuf)
                     os.remove(p)
 
         return
