@@ -31,20 +31,22 @@ def main():
     """
     main
     """
+
     os.system("rm -f bookconversionswaiting/*.html")
     special_interests = ["kubernetes", "coreos", "docker", "redis", "etcd", "celery", "python"]
     os.system("sudo rm -Rf bookconversionswaiting/Github_Docs_Readmes&&mkdir -p bookconversionswaiting/Github_Docs_Readmes/_Readmes")
 
-    #for bs in os.listdir(rs):
+    # for bs in os.listdir(rs):
     bs = os.path.expanduser("~/workspace/github/_projects")
+
     if os.path.isdir(bs):
         for d in os.listdir(bs):
-
             have_docs = False
             fp = os.path.join(bs, d)
             print(fp)
             cntdup = 0
             testpath = "bookconversionswaiting/Github_Docs_Readmes/" + d
+
             if os.path.isdir(fp):
                 rm1 = os.path.join(fp, "readme.md")
                 rm2 = os.path.join(fp, "readme.txt")
@@ -69,8 +71,6 @@ def main():
                             c = open(rm).read()
 
                     if ce:
-
-
                         while os.path.exists(testpath):
                             cntdup += 1
                             testpath = "bookconversionswaiting/Github_Docs_Readmes/" + d + str(cntdup)
@@ -85,7 +85,9 @@ def main():
                     if os.path.exists(docu):
                         get_folder(d, fp)
                         have_docs = True
+
             error = True
+
             while error:
                 try:
                     if cntdup != 0:
@@ -95,10 +97,13 @@ def main():
                     error = False
                 except FileExistsError:
                     cntdup += 1
-            os.system("cp "+testpath + "/readme* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-            os.system("cp "+testpath + "/README* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+
+            os.system("cp " + testpath + "/readme* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+            os.system("cp " + testpath + "/README* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+
     os.system("rm -Rf bookconversionswaiting/Github_Docs_Readmes/_Readmes")
     os.system("sudo chown -R `whoami` bookconversionswaiting/Github_Docs_Readmes")
+
     print("delete py")
     os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print("delete go")
@@ -110,6 +115,7 @@ def main():
     print("delete godeps")
     os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
     os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
+
     print("delete empty folders")
     os.system("sudo find bookconversionswaiting -depth -empty -delete")
     print("convert txt to md")
