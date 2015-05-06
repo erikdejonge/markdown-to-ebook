@@ -66,5 +66,3 @@ $ python docs_github_get.py
 ```
 
 
-
-
