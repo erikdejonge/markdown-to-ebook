@@ -33,7 +33,7 @@ def convert(folder, ppool, convertlist):
         if os.path.isdir(os.path.join(folder, f)):
             convert(os.path.join(folder, f), ppool, convertlist)
         else:
-            if f.endswith(".md"):
+            if f.endswith(".md") or f.endswith('.markdown'):
                 fp = os.path.join(folder, f)
                 try:
                     c = open(str(fp), "rt").read()
