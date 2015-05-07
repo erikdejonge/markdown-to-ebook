@@ -9,20 +9,20 @@ def main():
     """
     main
     """
-    os.makedirs(os.path.expanduser("~/workspace/markdown-to-ebook/bookconversionswaiting/githubreadme/"), exist_ok=True)
+    os.makedirs(os.path.expanduser("~/workspace/markdown-to-ebook/bookcvwait/githubreadme/"), exist_ok=True)
 
-    os.chdir(os.path.expanduser("~/workspace/markdown-to-ebook/bookconversionswaiting/githubreadme"))
+    os.chdir(os.path.expanduser("~/workspace/markdown-to-ebook/bookcvwait/githubreadme"))
 
-    os.system("rm -Rf ~/workspace/markdown-to-ebook/bookconversionswaiting/githubreadme/*")
+    os.system("rm -Rf ~/workspace/markdown-to-ebook/bookcvwait/githubreadme/*")
     bs = os.path.expanduser("~/workspace/github/_projects")
 
     for d in os.listdir(bs):
         fp = os.path.join(bs, d)
         rm = os.path.join(fp, "readme.md")
-        np = os.path.expanduser("~/workspace/markdown-to-ebook/bookconversionswaiting/githubreadme/") + d + "/readme.md"
+        np = os.path.expanduser("~/workspace/markdown-to-ebook/bookcvwait/githubreadme/") + d + "/readme.md"
         if not os.path.exists(rm):
             rm = os.path.join(fp, "readme.rst")
-            np = os.path.expanduser("~/workspace/markdown-to-ebook/bookconversionswaiting/githubreadme/") + d + "/readme.rst"
+            np = os.path.expanduser("~/workspace/markdown-to-ebook/bookcvwait/githubreadme/") + d + "/readme.rst"
 
         if os.path.exists(rm):
             c = open(rm).read()

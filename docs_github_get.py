@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-convert bookconversionswaiting/Github_Docs_Readmes to html
+convert bookcvwait/Github_Docs_Readmes to html
 """
 from __future__ import print_function
 from __future__ import unicode_literals
@@ -19,12 +19,12 @@ def get_folder(d, fp):
     @type fp: str, unicode
     @return: None
     """
-    if not os.path.exists("bookconversionswaiting/Github_Docs_Readmes/" + d):
-        os.mkdir("bookconversionswaiting/Github_Docs_Readmes/" + d)
+    if not os.path.exists("bookcvwait/Github_Docs_Readmes/" + d):
+        os.mkdir("bookcvwait/Github_Docs_Readmes/" + d)
 
-    # open("bookconversionswaiting/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
-    os.system("sudo cp -r " + fp + " bookconversionswaiting/Github_Docs_Readmes/")
-    os.system("sudo rm -Rf bookconversionswaiting/Github_Docs_Readmes/" + d + "/.git")
+    # open("bookcvwait/Github_Docs_Readmes/" + d + "/" + d + ".md", "w").write(c)
+    os.system("sudo cp -r " + fp + " bookcvwait/Github_Docs_Readmes/")
+    os.system("sudo rm -Rf bookcvwait/Github_Docs_Readmes/" + d + "/.git")
 
 
 def main():
@@ -32,9 +32,9 @@ def main():
     main
     """
 
-    os.system("rm -f bookconversionswaiting/*.html")
+    os.system("rm -f bookcvwait/*.html")
     special_interests = ["kubernetes", "coreos", "docker", "redis", "etcd", "celery", "python"]
-    os.system("sudo rm -Rf bookconversionswaiting/Github_Docs_Readmes&&mkdir -p bookconversionswaiting/Github_Docs_Readmes/_Readmes")
+    os.system("sudo rm -Rf bookcvwait/Github_Docs_Readmes&&mkdir -p bookcvwait/Github_Docs_Readmes/_Readmes")
 
     # for bs in os.listdir(rs):
     bs = os.path.expanduser("~/workspace/github/_projects")
@@ -45,7 +45,7 @@ def main():
             fp = os.path.join(bs, d)
             print(fp)
             cntdup = 0
-            testpath = "bookconversionswaiting/Github_Docs_Readmes/" + d
+            testpath = "bookcvwait/Github_Docs_Readmes/" + d
 
             if os.path.isdir(fp):
                 rm1 = os.path.join(fp, "readme.md")
@@ -73,7 +73,7 @@ def main():
                     if ce:
                         while os.path.exists(testpath):
                             cntdup += 1
-                            testpath = "bookconversionswaiting/Github_Docs_Readmes/" + d + str(cntdup)
+                            testpath = "bookcvwait/Github_Docs_Readmes/" + d + str(cntdup)
 
                         os.mkdir(testpath)
                         open(testpath + "/" + d + ".md", "w").write(c)
@@ -93,33 +93,33 @@ def main():
                     if cntdup != 0:
                         d = d + str(cntdup)
 
-                    os.mkdir("bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d)
+                    os.mkdir("bookcvwait/Github_Docs_Readmes/_Readmes/" + d)
                     error = False
                 except FileExistsError:
                     cntdup += 1
 
-            os.system("cp " + testpath + "/readme* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
-            os.system("cp " + testpath + "/README* bookconversionswaiting/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+            os.system("cp " + testpath + "/readme* bookcvwait/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
+            os.system("cp " + testpath + "/README* bookcvwait/Github_Docs_Readmes/_Readmes/" + d + "/ 2> /dev/null")
 
-    os.system("rm -Rf bookconversionswaiting/Github_Docs_Readmes/_Readmes")
-    os.system("sudo chown -R `whoami` bookconversionswaiting/Github_Docs_Readmes")
+    os.system("rm -Rf bookcvwait/Github_Docs_Readmes/_Readmes")
+    os.system("sudo chown -R `whoami` bookcvwait/Github_Docs_Readmes")
 
     print("delete py")
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name '*.py' -exec rm -rf {} \; 2> /dev/null")
     print("delete go")
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name '*.go' -exec rm -rf {} \; 2> /dev/null")
     print("delete js")
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name '*.js*' -exec rm -rf {} \; 2> /dev/null")
     print('delete html')
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name '*.html' -exec rm -rf {} \; 2> /dev/null")
     print("delete godeps")
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
-    os.system("cd bookconversionswaiting/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+    os.system("cd bookcvwait/Github_Docs_Readmes&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
 
     print("delete empty folders")
-    os.system("sudo find bookconversionswaiting -depth -empty -delete")
+    os.system("sudo find bookcvwait -depth -empty -delete")
     print("convert txt to md")
-    os.system("""find bookconversionswaiting/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+    os.system("""find bookcvwait/ -name '*.txt' -type f -exec bash -c 'echo $1&&mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
 
 
 if __name__ == "__main__":

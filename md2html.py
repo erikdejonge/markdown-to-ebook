@@ -64,7 +64,7 @@ def convertmdcode(ext):
     @type ext: str, unicode
     @return: None
     """
-    for p in os.popen("find bookconversionfolder -name  '*.md" + ext + "' -type f").read().split("\n"):
+    for p in os.popen("find bookcv -name  '*.md" + ext + "' -type f").read().split("\n"):
         if os.path.exists(p):
             if ext.lower().strip() == "js":
                 extcss = "javascript"
@@ -131,12 +131,12 @@ def got_books_to_convert(converted):
     """
     got_books_to_convert
     """
-    dirfiles = os.listdir("bookconversionswaiting")
+    dirfiles = os.listdir("bookcvwait")
     currentdir = None
 
     if len(dirfiles) > 0:
         for i in dirfiles:
-            if os.path.isdir(os.path.join("bookconversionswaiting", i)):
+            if os.path.isdir(os.path.join("bookcvwait", i)):
                 if i not in converted and currentdir is None:
                     currentdir = i
                     converted.append(i)
@@ -150,48 +150,48 @@ def main():
     """
     parser = ArgumentParser()
     parser.add_argument("-c", "--convertcode", dest="convertcode", help="Convert sourcecode (py, go, coffee and js) to md", action='store_true')
-    parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the bookconversionfolder archive", action='store_true')
+    parser.add_argument("-r", "--restorecode", dest="restorecode", help="Reset the converted code from the bookcv archive", action='store_true')
     args, unknown = parser.parse_known_args()
 
     if args.restorecode:
-        console("busy restoring bookconversionfolder folder.", color="green")
+        console("busy restoring bookcv folder.", color="green")
 
-        if os.path.exists("bookconversionfolder"):
-            shutil.rmtree("bookconversionfolder")
+        if os.path.exists("bookcv"):
+            shutil.rmtree("bookcv")
 
-        os.system("pigz -d bookconversionswaiting.tar.gz&&tar -xf bookconversionswaiting.tar")
+        os.system("pigz -d bookcvwait.tar.gz&&tar -xf bookcvwait.tar")
 
-    if not os.path.exists("bookconversionfolder"):
-        os.mkdir("bookconversionfolder")
+    if not os.path.exists("bookcv"):
+        os.mkdir("bookcv")
 
-    if len(os.listdir("./bookconversionswaiting")) == 0:
-        console("bookconversionswaiting folder is empty", color="red")
+    if len(os.listdir("./bookcvwait")) == 0:
+        console("bookcvwait folder is empty", color="red")
         return
 
-    os.system("rm -f bookconversionswaiting.tar.gz; tar -cf bookconversionswaiting.tar ./bookconversionswaiting; pigz bookconversionswaiting.tar;")
+    os.system("rm -f bookcvwait.tar.gz; tar -cf bookcvwait.tar ./bookcvwait; pigz bookcvwait.tar;")
     convertcode = args.convertcode
-    os.system("rm -Rf ./bookconversionfolder/*")
+    os.system("rm -Rf ./bookcv/*")
     converted = []
     book = got_books_to_convert(converted)
 
     while book:
-        os.system("cp -r bookconversionswaiting/" + book + " ./bookconversionfolder/")
-        os.system("sudo find ./bookconversionfolder/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
-        os.system("sudo find ./bookconversionfolder/* -name '.hg' -exec rm -rf {} \; 2> /dev/null")
-        dirfiles = os.listdir("bookconversionfolder")
+        os.system("cp -r bookcvwait/" + book + " ./bookcv/")
+        os.system("sudo find ./bookcv/* -name '.git' -exec rm -rf {} \; 2> /dev/null")
+        os.system("sudo find ./bookcv/* -name '.hg' -exec rm -rf {} \; 2> /dev/null")
+        dirfiles = os.listdir("bookcv")
         dirforname = []
 
         if len(dirfiles) > 1:
             for i in dirfiles:
-                if os.path.isdir(os.path.join("bookconversionfolder", i)):
+                if os.path.isdir(os.path.join("bookcv", i)):
                     dirforname.append(i)
 
             if len(dirforname) > 1:
-                console("more then 1 folder found in the bookconversionfolder directory, please correct this (one folder is one book)", color="red")
+                console("more then 1 folder found in the bookcv directory, please correct this (one folder is one book)", color="red")
                 return
 
             if len(dirforname) == 0:
-                console("no folders found in the bookconversionfolder directory, please correct this (one folder is one book)", color="red")
+                console("no folders found in the bookcv directory, please correct this (one folder is one book)", color="red")
                 return
         else:
             dirforname = dirfiles
@@ -225,21 +225,21 @@ def main():
         source_file_rm_or_md(convertcode, "c")
 
         console("cleaning", color="yellow")
-        os.system("cd bookconversionfolder/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
-        os.system("cd bookconversionfolder/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
-        os.system("cd bookconversionfolder/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
-        os.system("cd bookconversionfolder/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
-        os.system("cd bookconversionfolder/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
-        os.system("sudo find bookconversionfolder -depth -empty -delete")
-        os.system("""find bookconversionfolder/ ! -name '*.*' -type f -exec bash -c 'mv "$1" "$1.txt"' -- {} \; 2> /dev/null""")
-        os.system("""find bookconversionfolder/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
-        os.system("""find bookconversionfolder/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
-        os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookcv/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
+        os.system("cd bookcv/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookcv/*&&sudo find . -name 'commands' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookcv/*&&sudo find . -name 'Godeps*' -exec rm -rf {} \; 2> /dev/null")
+        os.system("cd bookcv/*&&sudo find . -name '_Godeps*' -exec rm -rf {} \; 2> /dev/null")
+        os.system("sudo find bookcv -depth -empty -delete")
+        os.system("""find bookcv/ ! -name '*.*' -type f -exec bash -c 'mv "$1" "$1.txt"' -- {} \; 2> /dev/null""")
+        os.system("""find bookcv/ -name '*.txt' -type f -exec bash -c 'mv "$1" "${1/.txt/.md}"' -- {} \; 2> /dev/null""")
+        os.system("""find bookcv/ -name '*.rst' -type f -exec bash -c 'mv "$1" "${1/.rst/.md}"' -- {} \; 2> /dev/null""")
+        os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
 
         console("pandoc", color="yellow")
         ppool = Pool(multiprocessing.cpu_count())
         convertlist = []
-        convert("bookconversionfolder", ppool, convertlist)
+        convert("bookcv", ppool, convertlist)
 
         for i in convertlist:
             res = startconversion(i)
@@ -250,26 +250,26 @@ def main():
         ppool.close()
         ppool.join()
 
-        os.system("cd bookconversionfolder/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
-        make_toc("bookconversionfolder", booktitle)
+        os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
+        make_toc("bookcv", booktitle)
         console("converting to ebook", color="yellow")
         pdf = False
-        os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
+        os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookcv/" + booktitle.replace("_", "\\ ") + ".html ./bookcv/" + booktitle.replace("_", "\\ ") + ".mobi -v --authors=edj")
         if pdf:
-            os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".html ./bookconversionfolder/" + booktitle.replace("_", "\\ ") + ".pdf \
+            os.system("/Applications/calibre.app/Contents/MacOS/ebook-convert ./bookcv/" + booktitle.replace("_", "\\ ") + ".html ./bookcv/" + booktitle.replace("_", "\\ ") + ".pdf \
             --paper-size=a4  --pdf-serif-family=\"Helvetica Neue\" --pdf-sans-family=\"Helvetica\" --pdf-standard-font=\"serif\" --pdf-mono-family=\"Source Code Pro Regular\" --pdf-mono-font-size=\"12\" --pdf-default-font-size=\"12\" -v --authors=edj")
 
-            # os.system("mv ./bookconversionfolder/*.pdf ./books/")
+            # os.system("mv ./bookcv/*.pdf ./books/")
 
-        # os.system("rm -Rf ./bookconversionfolder/*")
+        # os.system("rm -Rf ./bookcv/*")
         os.system("rm -Rf ./books/" + booktitle)
-        os.system("mv -f ./bookconversionfolder/* ./books/")
+        os.system("mv -f ./bookcv/* ./books/")
         book = got_books_to_convert(converted)
 
         if book:
             console("-------")
 
-    os.system("rm -Rf ./bookconversionswaiting/*")
+    os.system("rm -Rf ./bookcvwait/*")
 
 
 def make_toc(folder, bookname):
@@ -302,7 +302,7 @@ def source_file_rm_or_md(convertcode, targetextension):
     if targetextension == "rst":
         console("converting rst")
 
-        for p in os.popen("find bookconversionfolder -name  *.rst -type f").read().split("\n"):
+        for p in os.popen("find bookcv -name  *.rst -type f").read().split("\n"):
             if len(p.strip()) > 0:
                 if os.path.exists(p):
                     console("rst2md:", p, "->", p.lower().replace(".rst", ".md"))
@@ -340,10 +340,10 @@ def source_file_rm_or_md(convertcode, targetextension):
         return
     else:
         if convertcode:
-            os.system("""find bookconversionfolder/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
+            os.system("""find bookcv/ -name '*.""" + targetextension + """' -type f -exec bash -c 'mv "$1" "${1/.""" + targetextension + """/.md""" + targetextension + """}"' -- {} \; 2> /dev/null""")
             convertmdcode(targetextension)
         else:
-            os.system("cd bookconversionfolder/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
+            os.system("cd bookcv/*&&sudo find . -name '*." + targetextension + "' -exec rm -rf {} \; 2> /dev/null")
 
 
 def startconversion(t):
@@ -370,7 +370,7 @@ def toc_files(folder, toc):
                 dname = dname.split("/")
                 dname = dname[2:]
                 dname = "/".join(dname)
-                toc += '<a href="' + os.path.join(folder, f).replace("bookconversionfolder", "").lstrip("/") + '">' + dname.replace("bookconversionfolder", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
+                toc += '<a href="' + os.path.join(folder, f).replace("bookcv", "").lstrip("/") + '">' + dname.replace("bookcv", "").replace(".html", "").replace("_", " ").strip() + '</a><br/>\n'
 
     return toc
 

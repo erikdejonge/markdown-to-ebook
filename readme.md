@@ -12,7 +12,7 @@ $ npm install -g ebook
 ```
 
 ####Step 1
-Put md5, rst, txt and code files in folders inside of the bookconversionswaiting directory
+Put md5, rst, txt and code files in folders inside of the bookcvwait directory
 ./book1/
 ./book2/
 
@@ -23,7 +23,7 @@ Run the md2html python script, this will convert all .md files to .html, and gen
 
 ```bash
 $ python md2html.py
-convert: bookconversionfolder/GithubReadmeDocs/coffee-script/test/importing 2 items
+convert: bookcv/GithubReadmeDocs/coffee-script/test/importing 2 items
 ...
 ```
 After conversion an ebook is created with the .mobi extension in the books folde
@@ -51,7 +51,7 @@ Kindle on Mac
 
 
 ##make an ebook of all your cloned github projects
-Run one of the collection scripts, and put the results in the bookconversionfolder folder, continue at step 1
+Run one of the collection scripts, and put the results in the bookcv folder, continue at step 1
 
 Checkout [github-star-syncer](https://github.com/erikdejonge/github-stars-syncer)
 

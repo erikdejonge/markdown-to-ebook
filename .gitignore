@@ -1,9 +1,9 @@
 todo
-bookconversionfolder.tar.gz
-bookconversionswaiting.tar.gz
+bookcv.tar.gz
+bookcvwait.tar.gz
 github/*
-bookconversionfolder/*
-bookconversionswaiting/*
+bookcv/*
+bookcvwait/*
 books/*
 .idea
 # Byte-compiled / optimized / DLL files
