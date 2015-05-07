@@ -224,7 +224,7 @@ def main():
         source_file_rm_or_md(convertcode, "json")
         source_file_rm_or_md(convertcode, "coffee")
         source_file_rm_or_md(convertcode, "c")
-        exit(1)
+
         console("cleaning", color="yellow")
         os.system("cd bookcv/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
         os.system("cd bookcv/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
@@ -238,7 +238,7 @@ def main():
         os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
 
         console("pandoc", color="yellow")
-        ppool = Pool(1)
+        ppool = Pool()
         convertlist = []
         convert("bookcv", ppool, convertlist)
 
@@ -251,7 +251,7 @@ def main():
         ppool.close()
         ppool.join()
 
-        exit(1)
+
         os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
         make_toc("bookcv", booktitle)
         console("converting to ebook", color="yellow")
