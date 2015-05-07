@@ -33,7 +33,7 @@ def convert(folder, ppool, convertlist):
         if os.path.isdir(os.path.join(folder, f)):
             convert(os.path.join(folder, f), ppool, convertlist)
         else:
-            if f.endswith(".md") or f.endswith('.markdown'):
+            if f.endswith(".md"):
                 fp = os.path.join(folder, f)
                 try:
                     c = open(str(fp), "rt").read()
@@ -215,6 +215,7 @@ def main():
         console(booktitle, color="green")
         console("converting", color="yellow")
         source_file_rm_or_md(convertcode, "sh")
+        source_file_rm_or_md(convertcode, "markdown")
         source_file_rm_or_md(convertcode, "rst")
         source_file_rm_or_md(convertcode, "h")
         source_file_rm_or_md(convertcode, "py")
@@ -223,7 +224,7 @@ def main():
         source_file_rm_or_md(convertcode, "json")
         source_file_rm_or_md(convertcode, "coffee")
         source_file_rm_or_md(convertcode, "c")
-
+        exit(1)
         console("cleaning", color="yellow")
         os.system("cd bookcv/*&&sudo find . -type l -exec rm -f {} \; 2> /dev/null")
         os.system("cd bookcv/*&&sudo find . -name 'man' -exec rm -rf {} \; 2> /dev/null")
@@ -237,7 +238,7 @@ def main():
         os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
 
         console("pandoc", color="yellow")
-        ppool = Pool(multiprocessing.cpu_count())
+        ppool = Pool(1)
         convertlist = []
         convert("bookcv", ppool, convertlist)
 
@@ -250,6 +251,7 @@ def main():
         ppool.close()
         ppool.join()
 
+        exit(1)
         os.system("cd bookcv/*&&sudo find . -name 'tempfolder*' -exec rm -rf {} \; 2> /dev/null")
         make_toc("bookcv", booktitle)
         console("converting to ebook", color="yellow")
@@ -270,6 +272,8 @@ def main():
             console("-------")
 
     os.system("rm -Rf ./bookcvwait/*")
+from rst2md import make_nice_md
+from mdcodeblockcorrect import correct_codeblocks
 
 
 def make_toc(folder, bookname):
@@ -299,7 +303,14 @@ def source_file_rm_or_md(convertcode, targetextension):
     @type targetextension: str, unicode
     @return: None
     """
-    if targetextension == "rst":
+    if targetextension == "markdown":
+        for p in os.popen("find bookcv -name  *.markdown -type f").read().split("\n"):
+            if len(p.strip()) > 0:
+                if os.path.exists(p):
+                    console("rst2md:", p, "->", p.lower().replace(".markdown", ".md"))
+                    os.rename(p, p.lower().replace(".markdown", ".md"))
+
+    elif targetextension == "rst":
         console("converting rst")
 
         for p in os.popen("find bookcv -name  *.rst -type f").read().split("\n"):
@@ -308,33 +319,49 @@ def source_file_rm_or_md(convertcode, targetextension):
                     console("rst2md:", p, "->", p.lower().replace(".rst", ".md"))
 
                     if not os.path.exists(p.lower().replace(".rst", ".md")):
-                        os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md"))
+                        bufdotdot = [x for x in open(p)]
+                        bufdotdot2 = []
+
+                        for bd in bufdotdot:
+                            bd = bd.rstrip()
+                            if bd.startswith("    #"):
+
+                                bd = "\n"+bd.replace("   #", '')+"\n\n"
+
+                            if ":class:" in bd:
+                                bd = bd.replace(":class:", "").replace("`", "")
+
+                            if not bd.strip().startswith(".."):
+                                bufdotdot2.append(bd)
+
+                        open(p, "w").write("\n".join(bufdotdot2))
+
+                        os.system("pandoc -f rst -t markdown_github " + p + " -o " + p.lower().replace(".rst", ".md") + " 2> /dev/null")
                         try:
                             codebuf = [x for x in open(p.lower().replace(".rst", ".md"))]
-                            codebuf.append("")
-                            codebuf.append("")
-                            codebuf.append("")
-                            codebuf.append("")
-                            cnt = 0
-                            codebuf2 = ""
 
-                            for l in codebuf:
-                                if "sourceCode" in l:
-                                    if "$" in codebuf[cnt + 1]:
-                                        l = l.replace("sourceCode", "bash")
-                                    elif ">" in codebuf[cnt + 1]:
-                                        l = l.replace("sourceCode", "bash")
-                                    else:
-                                        l = l.replace("sourceCode", "python")
-
-                                codebuf2 += l
-                                cnt += 1
-
+                            codebuf2 = make_nice_md(codebuf)
                             open(p.lower().replace(".rst", ".md"), "w").write(codebuf2)
-                        except:
+
+                        except BaseException as e:
+                            print("\033[31m", e, "\033[0m")
                             codebuf = open(p.lower().replace(".rst", ".md")).read()
                             codebuf = codebuf.replace("sourceCode", "python")
-                            open(p.lower().replace(".rst", ".md", "w")).write(codebuf)
+                            open(p.lower().replace(".rst", ".md"), "w").write(codebuf)
+                        try:
+                            cnt = correct_codeblocks(p.lower().replace(".rst", ".md"))
+                            print("\033[94m" + p.lower().replace(".rst", ".md"), "->\033[0;96m " + str(cnt) + " code blocks corrected\033[0m")
+                        except BaseException as e:
+                            print("\033[31m", e, "\033[0m")
+
+                        codebuf = [x for x in open(p.lower().replace(".rst", ".md"))]
+                        codebuf.append("")
+                        codebuf2 = make_nice_md(codebuf)
+                        open(p.lower().replace(".rst", ".md"), "w").write(codebuf2)
+                        cnt = correct_codeblocks(p.lower().replace(".rst", ".md"), force=True)
+                        print("\033[94m" + p.lower().replace(".rst", ".md"), "->\033[0;96m " + str(cnt) + " code blocks corrected\033[0m")
+
+
                     os.remove(p)
 
         return
