@@ -15,6 +15,7 @@ def main():
 
     os.system("rm -Rf ~/workspace/markdown-to-ebook/bookcvwait/githubreadme/*")
     bs = os.path.expanduser("~/workspace/github/_projects")
+    bs = os.path.expanduser("~/study/django-modules")
 
     for d in os.listdir(bs):
         fp = os.path.join(bs, d)
