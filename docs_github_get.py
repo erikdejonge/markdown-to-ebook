@@ -38,6 +38,7 @@ def main():
 
     # for bs in os.listdir(rs):
     bs = os.path.expanduser("~/workspace/github/_projects")
+    bs = os.path.expanduser("~/Desktop/django-modules")
 
     if os.path.isdir(bs):
         for d in os.listdir(bs):
