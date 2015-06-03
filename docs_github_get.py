@@ -38,7 +38,8 @@ def main():
 
     # for bs in os.listdir(rs):
     bs = os.path.expanduser("~/workspace/github/_projects")
-    bs = os.path.expanduser("~/Desktop/django-modules")
+    bs = os.path.expanduser("~/Desktop/ghresearch/django")
+    bs = os.path.expanduser("~/Desktop/ghresearch/twitter")
 
     if os.path.isdir(bs):
         for d in os.listdir(bs):
@@ -53,8 +54,8 @@ def main():
                 rm2 = os.path.join(fp, "readme.txt")
                 rm3 = os.path.join(fp, "readme.rst")
                 rm4 = os.path.join(fp, "readme")
-                docs = os.path.join(fp, "docs")
-                docu = os.path.join(fp, "Documentation")
+                docs = os.path.join(fp, "xdocs")
+                docu = os.path.join(fp, "xDocumentation")
 
                 for interest in special_interests:
                     if interest.lower() in fp.lower():
